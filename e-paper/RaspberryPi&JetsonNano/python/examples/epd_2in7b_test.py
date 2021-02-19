@@ -37,7 +37,6 @@ try:
     logging.info("1.Drawing on the Horizontal image...")
     HBlackimage = Image.new('1', (epd.height, epd.width), 255)  # 298*126
     HRedimage = Image.new('1', (epd.height, epd.width), 255)  # 298*126    
-    
     drawblack = ImageDraw.Draw(HBlackimage)
     drawred = ImageDraw.Draw(HRedimage)
     drawblack.text((10, 0), 'hello world', font = font24, fill = 0)
@@ -52,7 +51,7 @@ try:
     drawred.rectangle((80, 50, 130, 100), fill = 0)
     drawred.chord((200, 50, 250, 100), 0, 360, fill = 0)
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRedimage))
-    time.sleep(2)
+    time.sleep(20)
     
     # Drawing on the Vertical image
     logging.info("2.Drawing on the Vertical image...")
@@ -94,6 +93,8 @@ try:
     
     logging.info("Goto Sleep...")
     epd.sleep()
+    time.sleep(3)
+    epd.Dev_exit()
         
 except IOError as e:
     logging.info(e)

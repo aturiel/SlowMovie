@@ -19,6 +19,7 @@ try:
     logging.info("epd1in54_V2 Demo")
     
     epd = epd1in54_V2.EPD()
+    
     logging.info("init and Clear")
     epd.init()
     epd.Clear(0xFF)
@@ -61,8 +62,9 @@ try:
     time.sleep(2)
     
     # partial update
-    logging.info("4.show time...")    
-    time_image = Image.new('1', (epd.width, epd.height), 255)
+    logging.info("4.show time...")
+    time_image = image1
+    # Image.new('1', (epd.width, epd.height), 255)
     epd.displayPartBaseImage(epd.getbuffer(time_image))
     
     time_draw = ImageDraw.Draw(time_image)
@@ -74,7 +76,7 @@ try:
         time_image.paste(newimage, (10,10))  
         epd.displayPart(epd.getbuffer(time_image))
         num = num + 1
-        if(num == 10):
+        if(num == 20):
             break
     
     logging.info("Clear...")
@@ -83,6 +85,9 @@ try:
     
     logging.info("Goto Sleep...")
     epd.sleep()
+    time.sleep(3)
+    
+    epd.Dev_exit()
         
 except IOError as e:
     logging.info(e)

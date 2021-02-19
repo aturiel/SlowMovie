@@ -57,7 +57,7 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, 0) # module reset
-        epdconfig.delay_ms(10)
+        epdconfig.delay_ms(5)
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
@@ -213,6 +213,7 @@ class EPD:
         
         self.send_command(0x02) # power off
         
+    def Dev_exit(self):
         epdconfig.module_exit()
 
 ### END OF FILE ###

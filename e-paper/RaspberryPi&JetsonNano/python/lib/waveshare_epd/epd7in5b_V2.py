@@ -1,11 +1,11 @@
 # *****************************************************************************
-# * | File        :	  epd7in5bc.py
+# * | File        :	  epd7in5b_V2.py
 # * | Author      :   Waveshare team
 # * | Function    :   Electronic paper driver
 # * | Info        :
 # *----------------
-# * | This version:   V4.0
-# * | Date        :   2019-06-20
+# * | This version:   V4.1
+# * | Date        :   2020-11-30
 # # | Info        :   python demo
 # -----------------------------------------------------------------------------
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -108,7 +108,13 @@ class EPD:
 
         self.send_command(0X60);			#TCON SETTING
         self.send_data(0x22);
-        
+
+        self.send_command(0x65);
+        self.send_data(0x00);
+        self.send_data(0x00);
+        self.send_data(0x00);
+        self.send_data(0x00);
+    
         return 0
 
     def getbuffer(self, image):
@@ -168,6 +174,7 @@ class EPD:
         self.send_command(0x07) # DEEP_SLEEP
         self.send_data(0XA5)
         
+    def Dev_exit(self):
         epdconfig.module_exit()
 ### END OF FILE ###
 

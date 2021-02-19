@@ -1,11 +1,11 @@
 # *****************************************************************************
-# * | File        :	  epd2in9bc.py
+# * | File        :	  epd2in9b_V3.py
 # * | Author      :   Waveshare team
 # * | Function    :   Electronic paper driver
 # * | Info        :
 # *----------------
-# * | This version:   V4.0
-# * | Date        :   2019-06-20
+# * | This version:   V1.1
+# * | Date        :   2020-12-03
 # # | Info        :   python demo
 # -----------------------------------------------------------------------------
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -49,7 +49,7 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, 0)
-        epdconfig.delay_ms(10)
+        epdconfig.delay_ms(2)
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
@@ -153,6 +153,7 @@ class EPD:
         self.send_command(0X07) # deep sleep
         self.send_data(0xA5)
         
+    def Dev_exit(self):
         epdconfig.module_exit()
 ### END OF FILE ###
 

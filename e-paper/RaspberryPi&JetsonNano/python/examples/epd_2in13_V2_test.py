@@ -22,7 +22,7 @@ try:
     logging.info("init and Clear")
     epd.init(epd.FULL_UPDATE)
     epd.Clear(0xFF)
-    
+
     # Drawing on the image
     font15 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 15)
     font24 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 24)
@@ -78,13 +78,15 @@ try:
         num = num + 1
         if(num == 10):
             break
-    
+    # epd.Clear(0xFF)
     logging.info("Clear...")
     epd.init(epd.FULL_UPDATE)
     epd.Clear(0xFF)
     
     logging.info("Goto Sleep...")
     epd.sleep()
+    time.sleep(3)
+    epd.Dev_exit()
         
 except IOError as e:
     logging.info(e)

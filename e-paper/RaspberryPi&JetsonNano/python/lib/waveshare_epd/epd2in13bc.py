@@ -48,7 +48,7 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, 0)
-        epdconfig.delay_ms(10)
+        epdconfig.delay_ms(5)
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
@@ -124,12 +124,12 @@ class EPD:
         self.send_command(0x10)
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(imageblack[i])
-        self.send_command(0x92)
+        # self.send_command(0x92)
         
         self.send_command(0x13)
         for i in range(0, int(self.width * self.height / 8)):
             self.send_data(imagered[i])
-        self.send_command(0x92)
+        # self.send_command(0x92)
         
         self.send_command(0x12) # REFRESH
         self.ReadBusy()
@@ -154,6 +154,7 @@ class EPD:
         self.send_command(0x07) # DEEP_SLEEP
         self.send_data(0xA5) # check code
         
+    def Dev_exit(self):
         epdconfig.module_exit()
 ### END OF FILE ###
 

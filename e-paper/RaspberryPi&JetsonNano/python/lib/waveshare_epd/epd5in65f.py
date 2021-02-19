@@ -108,7 +108,7 @@ class EPD:
         self.send_data(0xC7)
         self.send_data(0x1D)
         self.send_command(0x30)
-        self.send_data(0x3C)
+        self.send_data(0x3c)
         self.send_command(0x40)
         self.send_data(0x00)
         self.send_command(0x50)
@@ -122,11 +122,10 @@ class EPD:
         self.send_data(0xC0)
         self.send_command(0xE3)
         self.send_data(0xAA)
-	
+        
         epdconfig.delay_ms(100)
         self.send_command(0x50)
         self.send_data(0x37)
-        
         # EPD hardware init end
         return 0
 
@@ -235,5 +234,7 @@ class EPD:
         self.send_command(0x07) # DEEP_SLEEP
         self.send_data(0XA5)
         epdconfig.digital_write(self.reset_pin, 0)
-        epdconfig.module_exit()        
+
+    def Dev_exit(self):
+        epdconfig.module_exit()      
         

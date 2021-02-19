@@ -48,7 +48,7 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, 0)
-        epdconfig.delay_ms(10)
+        epdconfig.delay_ms(5)
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
@@ -67,21 +67,19 @@ class EPD:
     def ReadBusy(self):
         logging.debug("e-Paper busy")
         while(epdconfig.digital_read(self.busy_pin) == 1):
-            epdconfig.delay_ms(100)
+            epdconfig.delay_ms(20)
         logging.debug("e-Paper busy release")
 
     def TurnOnDisplay(self):
         self.send_command(0x22) # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0xF7)
         self.send_command(0x20) # MASTER_ACTIVATION
-        
         self.ReadBusy()
     
     def TurnOnDisplayPart(self):
         self.send_command(0x22) # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0xFF)
         self.send_command(0x20) # MASTER_ACTIVATION
-        
         self.ReadBusy()
 
     def init(self):
@@ -136,6 +134,7 @@ class EPD:
         for j in range(0, self.height):
             for i in range(0, int(self.width / 8)):
                 self.send_data(color)
+                
         self.TurnOnDisplay()
         
     def getbuffer(self, image):
@@ -173,7 +172,7 @@ class EPD:
     def displayPartBaseImage(self, image):
         if (image == None):
             return
-            
+        
         self.send_command(0x24)
         for j in range(0, self.height):
             for i in range(0, int(self.width / 8)):
@@ -181,7 +180,7 @@ class EPD:
         
         self.send_command(0x26)
         for j in range(0, self.height):
-            for i in range(0, self.width / 8):
+            for i in range(0, int(self.width / 8)):
                 self.send_data(image[i + j * int(self.width / 8)])
                 
         self.TurnOnDisplayPart()
@@ -190,6 +189,14 @@ class EPD:
         if (image == None):
             return
             
+        epdconfig.digital_write(self.reset_pin, 0)
+        epdconfig.delay_ms(10)
+        epdconfig.digital_write(self.reset_pin, 1)
+        epdconfig.delay_ms(10)   
+        
+        self.send_command(0x3c)
+        self.send_data(0x80)
+        
         self.send_command(0x24)
         for j in range(0, self.height):
             for i in range(0, int(self.width / 8)):
@@ -201,6 +208,7 @@ class EPD:
         self.send_command(0x10) # DEEP_SLEEP_MODE
         self.send_data(0x01)
         
+    def Dev_exit(self):
         epdconfig.module_exit()
 
 ### END OF FILE ###

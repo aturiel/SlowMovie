@@ -19,11 +19,12 @@ try:
     logging.info("epd7in5bc Demo")
     
     epd = epd7in5bc.EPD()
+
     logging.info("init and Clear")
     epd.init()
     epd.Clear()
     time.sleep(1)
-    
+
     # Drawing on the image
     logging.info("Drawing")    
     font24 = ImageFont.truetype(os.path.join(picdir, 'Font.ttc'), 24)
@@ -91,6 +92,9 @@ try:
     
     logging.info("Goto Sleep...")
     epd.sleep()
+    time.sleep(3)
+    
+    epd.Dev_exit()
         
 except IOError as e:
     logging.info(e)

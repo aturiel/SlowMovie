@@ -57,29 +57,32 @@ try:
     epd.display(epd.getbuffer(Himage2))
     time.sleep(2)
     
-    # # partial update
+    # partial update
     logging.info("5.show time...")
-    epd.init()    
-    epd.Clear(0xFF)
-    
-    time_image = Image.new('1', (epd.width, epd.height), 255)
-    time_draw = ImageDraw.Draw(time_image)
-    num = 0
-    while (True):
-        time_draw.rectangle((10, 10, 120, 50), fill = 255)
-        time_draw.text((10, 10), time.strftime('%H:%M:%S'), font = font24, fill = 0)
-        newimage = time_image.crop([10, 10, 120, 50])
-        time_image.paste(newimage, (10,10))  
-        epd.DisplayPartial(epd.getbuffer(time_image))
-        num = num + 1
-        if(num == 10):
-            break
+    # epd.init()    
+    # epd.Clear(0xFF)
+    # time_image = Image.new('1', (epd.width, epd.height), 255)
+    # time_draw = ImageDraw.Draw(time_image)
+    # num = 0
+    # while (True):
+        # time_draw.rectangle((10, 10, 120, 50), fill = 255)
+        # time_draw.text((10, 10), time.strftime('%H:%M:%S'), font = font24, fill = 0)
+        # newimage = time_image.crop([10, 10, 120, 50])
+        # time_image.paste(newimage, (10,10))  
+        # epd.DisplayPartial(epd.getbuffer(time_image))
+        # num = num + 1
+        # if(num == 10):
+            # break
     
     logging.info("Clear...")
+    epd.init()
     epd.Clear(0xFF)
     
     logging.info("Goto Sleep...")
     epd.sleep()
+    time.sleep(3)
+    
+    epd.Dev_exit()
         
 except IOError as e:
     logging.info(e)
