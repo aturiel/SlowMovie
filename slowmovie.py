@@ -42,7 +42,7 @@ logdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs/')
 def save_now_playing(currentVideo):
     f = open('nowPlaying', 'w')
     f.write(currentVideo)
-    f.close()    
+    f.close() 
 
 def save_progress(currentVideo, currentPosition):
     log = open(logdir + '%s<progress'%currentVideo, 'w')
