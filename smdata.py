@@ -162,29 +162,31 @@ class SlowMovieData:
             return retValue
 
     def setFavorite(self, json_str):
-        """set frame as favorite if empty currentFrame will be used"""
+        """set frame as favorite if only "id" currentFrame will be used"""
         try:
             favorite = json.loads(json_str)
 
-            if 'name' in favorite and 'frame' in favorite:
-                if favorite['name'] in self.smConfig['movies'].keys():
-                    if favorite['frame'] <= self.smConfig['movies'][favorite['name']]['frames']:
-                        return self.__addFavorite(favorite['name'], favorite['frame'])
-            else:
-                return self.__addFavorite(self.getMovie(), self.getCurrentFrame())
+            if 'id' in favorite:
+                if 'name' in favorite and 'frame' in favorite:
+                    if favorite['name'] in self.smConfig['movies'].keys():
+                        if favorite['frame'] <= self.smConfig['movies'][favorite['name']]['frames']:
+                            return self.__addFavorite(favorite['name'], favorite['frame'], favorite['id'])
+                else:
+                    return self.__addFavorite(self.getMovie(), self.getCurrentFrame(), favorite['id'])
 
         except ValueError as e:
             logging.error("Could not parse favorite: {}".format(e))
         
         return False
 
-    def __addFavorite(self, name, frame):
+    def __addFavorite(self, name, frame, id):
         logging.info("Set as favorite {} {}".format(name, frame))
 
         if not 'favorites' in self.smConfig['movies'][name]:
-            self.smConfig['movies'][name]['favorites'] = set()
+            self.smConfig['movies'][name]['favorites'] = {}
         
-        self.smConfig['movies'][name]['favorites'].add(frame)
+        #TODO check for errors
+        self.smConfig['movies'][name]['favorites'][id] = frame
 
         self.__save()
         return True
