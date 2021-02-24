@@ -166,7 +166,7 @@ class SlowMovieData:
     def __setJson(self, json_str):
         """update all settings from json"""
         try:
-            self.__configFromDict(self, json.loads(json_str))
+            self.__configFromDict(json.loads(json_str))
             return True
         except ValueError as e:
             logging.error("Could not parse json settings: {}".format(e))
