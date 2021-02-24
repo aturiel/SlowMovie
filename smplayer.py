@@ -10,20 +10,19 @@
 # ** Waveshare library   **
 # *************************
 
-import os, time, sys, random 
-from PIL import Image
+import time 
 import ffmpeg
-import argparse
 import logging
 
+#'''
+from PIL import Image
 # Ensure this is the correct import for your particular screen 
 from waveshare_epd import epd7in5_V2
+#'''
 
 CURRENT_FRAME = 'grab.jpg'
 
-# if videos size matches your particular screen  (epd.width, epd.height)
-# ... process will be faster
-# epd7in5_V2 is
+# if videos size matches your particular screen  (epd.width, epd.height) generate_frame will be faster
 WIDTH = 800
 HEIGHT = 480 
 
@@ -41,7 +40,7 @@ class SlowMoviePlayer:
         #'''
 
     def generate_frame(self, in_filename, out_filename, frame, width=WIDTH, height=HEIGHT): 
-        time = "%dms"%(frame*41.666666)
+        time = "%dms"%(float(frame)*41.666666)
         (
             ffmpeg
             .input(in_filename, ss=time)
@@ -54,15 +53,12 @@ class SlowMoviePlayer:
 
     def play(self):
         while True: 
-            frame = self.smdata.getCurrentFrame()
-            videoFile = self.smdata.getMovieFile();
-
             start_time = time.time()
-            if videoFile:
+            if self.smdata.movieFile:
                 try:
                     # Use ffmpeg to extract a frame from the movie, 
                     # ... crop it, letterbox it and save it as grab.jpg 
-                    self.generate_frame(videoFile, CURRENT_FRAME, frame)
+                    self.generate_frame(self.smdata.movieFile, CURRENT_FRAME, self.smdata.currentFrame)
                     ellapsed_generate = time.time() - start_time
 
                     start_time = time.time()
@@ -75,7 +71,7 @@ class SlowMoviePlayer:
                     self.epd.display(self.epd.getbuffer(pil_im))
                     #'''
                 except ffmpeg.Error as e:
-                    logging.error("Could not read movie '{}': {}".format(file, e))
+                    logging.error("Could not read movie '{}': {}".format(self.smdata.movieFile, e))
                 except:
                     logging.error("Could not process frame")
 
@@ -83,14 +79,14 @@ class SlowMoviePlayer:
 
             logging.info('Movie:{} - Frame:{} of {} - Extracted:{:.1f} - Displayed:{:.1f}'
                 .format(
-                    self.smdata.getMovie() if videoFile else None, 
-                    frame, 
-                    self.smdata.getMovieFrames(), 
+                    self.smdata.movie if self.smdata.movieFile else None, 
+                    self.smdata.currentFrame, 
+                    self.smdata.movieFrames, 
                     ellapsed_generate, 
                     ellapsed
                 ))
 
-            time.sleep(self.smdata.getDelay())
+            time.sleep(self.smdata.delay)
             #epd.init()
 
             self.smdata.incrementFrame()
