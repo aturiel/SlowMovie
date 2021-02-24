@@ -152,8 +152,7 @@ class SlowMovieData:
 
         with f:
             try:
-                x, y = json.load(f)
-                self.__configFromDict(self, json.load(f))
+                self.__configFromDict(json.load(f))
 
             except ValueError as err:
                 logging.error("Could not load {}: {}".format(DATA_FILE, err))
