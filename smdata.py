@@ -110,7 +110,7 @@ class SlowMovieData:
         else:
             self.__movie = ''
 
-    def __loadFromDict(self, dict):
+    def __configFromDict(self, dict):
         """all settings to json object"""
         self.__delay = dict['delay']
         self.__increment = dict['increment']
@@ -118,7 +118,7 @@ class SlowMovieData:
         self.__movie = dict['movie']
         self.__movies = dict['movies']
 
-    def __saveToDict(self):
+    def configToDict(self):
         """all settings to json"""
         dict = {}
         dict['delay'] = self.__delay
@@ -138,7 +138,7 @@ class SlowMovieData:
             return False
 
         with f:
-            json.dump(self.__saveToDict(), f, ensure_ascii=False, indent=4)
+            json.dump(self.configToDict(), f, ensure_ascii=False, indent=4)
 
         return True
 
@@ -153,7 +153,7 @@ class SlowMovieData:
         with f:
             try:
                 x, y = json.load(f)
-                self.__loadFromDict(self, json.load(f))
+                self.__configFromDict(self, json.load(f))
 
             except ValueError as err:
                 logging.error("Could not load {}: {}".format(DATA_FILE, err))
@@ -162,12 +162,12 @@ class SlowMovieData:
 
     def getJson(self):
         """get config in a json object"""
-        return json.dumps(self.__saveToDict(), ensure_ascii=False)
+        return json.dumps(self.configToDict(), ensure_ascii=False)
 
     def __setJson(self, json_str):
         """update all settings from json"""
         try:
-            self.__loadFromDict(self, json.loads(json_str))
+            self.__configFromDict(self, json.loads(json_str))
             return True
         except ValueError as e:
             logging.error("Could not parse json settings: {}".format(e))

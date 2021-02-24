@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Slow Movie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style type="text/css">
+      input.sm-max { max-width: 90%; }
+      label { font-weight: 800}
+      .w3-row-padding { padding-top: 2em; padding-bottom: 2em;}
+      .tbl-chk { width: 30px; }
+      .tbl-movie { max-width: 100%; }
+      .tbl-frames { width: 100px; }
+      .tbl-current { width: 100px; }
+    </style>
+  </head>
+  <body>
+
+    <div class="w3-card-4">
+        <header class="w3-container w3-blue">
+            <h1>Slow Movie</h1>
+        </header>
+        <div class="w3-container">
+            <form action="/test" method="post" enctype="application/x-www-form-urlencoded">
+                <div class="w3-row-padding">
+                    <div class="w3-col s4">
+                        <label for="random">Random frames</label><br/>
+                        <input class="w3-check" type="checkbox" id="random" name="random" value="random" 
+                            {% if smData.random == true %}
+                                checked
+                            {% endif %} 
+                        >
+                    </div>
+                    <div class="w3-col s4">
+                        <label for="increment">Frame increment</label>
+                        <input class="w3-input sm-max w3-right-align" placeholder="Two" type="number" id="increment" name="increment" value="{{smData.increment}}">
+                    </div>
+                    <div class="w3-col s4">
+                        <label for="delay">Delay</label>
+                        <input class="w3-input sm-max w3-right-align" placeholder="Three" type="number" id="delay" name="delay" value="{{smData.delay}}">
+                    </div>
+                </div>
+
+                <table class="w3-table">
+                    <tr>
+                        <th class="tbl-chk"><label>Current</label></th>
+                        <th class="tbl-movie w3-right-align"><label>Movies</label></div>
+                        <th class="tbl-frames w3-right-align"><label>Frames</label></th>
+                        <th class="tbl-current w3-right-align"><label>Current</label></th>
+                    </tr>
+
+                    {% for key, value in smData.movies.items() %}
+                        <tr>
+                            <td class="tbl-chk" >
+                                <input class="s1" type="checkbox" id="{{key}}" name="{{key}}" value="{{key}}" 
+                                    {% if key == smData.movie %}
+                                        checked
+                                    {% endif %} 
+                                >
+                            </td>
+                            <td class="tbl-movie w3-right-align">{{key}}</td>
+                            <td class="tbl-frames w3-right-align">{{value.frames}}</td>
+                            <td class="tbl-current w3-right-align">
+                                <input class="w3-input w3-right-align" type="number" id="{{key}}_current" name="{{key}}_current" value="{{value.currentFrame}}">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <button class="w3-btn w3-section" type="submit" >Submit</button>
+            </form> 
+        </div>
+    </div>
+  </body>
+</html>

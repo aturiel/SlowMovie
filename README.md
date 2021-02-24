@@ -13,6 +13,9 @@ https://medium.com/s/story/very-slow-movie-player-499f76c48b62
 ## Run Slow Movie Server
 ```Shell
 cd /home/pi/SlowMovie
+
+pip3 install -U Jinja2
+
 python3 smserver.py
 ```
 

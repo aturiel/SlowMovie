@@ -11,7 +11,7 @@ Usage::
 import os, sys, signal, threading, socket
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
-
+import jinja2 
 import logging
 
 from smdata import SlowMovieData
@@ -60,10 +60,7 @@ class S(BaseHTTPRequestHandler):
         elif self.path == '/':
             logging.info("homepage")
             self.__set_response()
-            self.wfile.write(self._getHomePage()
-                .format(smData.getJson())
-                .encode("utf-8")
-            )
+            self.wfile.write(self._getHomePage().encode("utf-8"))
 
         else:
             logging.error(self.__remove_empty_lines(
@@ -137,45 +134,11 @@ class S(BaseHTTPRequestHandler):
         return file_data
     
     def _getHomePage(self):
-        return  """ 
-<!DOCTYPE html>
-<html>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<title>Slow Movie</title>
-<body>
-<header class="w3-container w3-teal">
-    <h1>Slow Movie</h1>
-</header>
-<div class="w3-container w3-margin-top">
-<form class="w3-container" action="/test" method="post" enctype="application/x-www-form-urlencoded">
-    <div class="w3-row">
-        <div class="w3-col s6">
-            <label for="increment">Increment:</label>
-        </div>
-        <div class="w3-col s6">
-            <label for="random">Random:</label>
-            <input class="" type="checkbox" id="random" name="random" value="random"{2}>
-        </div>
-    </div>
-            <input class="w3-input" type="number" id="increment" name="increment" value="{1}">
-            <label for="delay">Delay:</label>
-            <input class="w3-input" type="number" id="delay" name="delay" value="{0}">
-        <label for="movies">Movie:</label>
-        <select class="w3-select" id="movie" name="movie">
-            <option value="Bueno_Feo_Malo.mp4">Bueno_Feo_Malo</option>
-            <option value="Blade_Runner.mp4">Blade_Runner</option>
-            <option value="Bullitt.mp4">Bullitt</option>
-            <option value="North_by_Northwest.mp4">North_by_Northwest</option>
-            <option value="Psycho.mp4">Psycho</option>
-        </select>
- 
-    <button class="w3-btn w3-section" type="submit" >Submit</button>
-</form> 
-</div>
-</body>
-</html>
-""".format(int(1), int(2), ' checked')
+        templateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateEnv = jinja2.Environment(loader=templateLoader)
+        template = templateEnv.get_template("./templates/homepage.jinja")
+        outputText = template.render(smData=smData.configToDict())  # this is where to put args to the template renderer
+        return outputText
 
 class SlowMovieServer:
     def signal_handler(self,signal, frame):
