@@ -14,7 +14,7 @@ import time
 import ffmpeg
 import logging
 
-#'''
+#''' Comment this when testing without screen
 from PIL import Image
 # Ensure this is the correct import for your particular screen 
 from waveshare_epd import epd7in5_V2
@@ -30,7 +30,7 @@ class SlowMoviePlayer:
     def __init__(self, data):
         self.smdata = data
 
-        #'''
+        #''' Comment this when testing without screen
         # Ensure this is the correct driver for your particular screen 
         self.epd = epd7in5_V2.EPD()
 
@@ -39,8 +39,7 @@ class SlowMoviePlayer:
         #epd.Clear()
         #'''
 
-    def generate_frame(self, in_filename, out_filename, frame, width=WIDTH, height=HEIGHT): 
-        time = "%dms"%(float(frame)*41.666666)
+    def generate_frame(self, in_filename, out_filename, time, width=WIDTH, height=HEIGHT): 
         (
             ffmpeg
             .input(in_filename, ss=time)
@@ -56,13 +55,12 @@ class SlowMoviePlayer:
             start_time = time.time()
             if self.smdata.movieFile:
                 try:
-                    # Use ffmpeg to extract a frame from the movie, 
-                    # ... crop it, letterbox it and save it as grab.jpg 
-                    self.generate_frame(self.smdata.movieFile, CURRENT_FRAME, self.smdata.currentFrame)
+                    # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
+                    self.generate_frame(self.smdata.movieFile, CURRENT_FRAME, self.smdata.currentTimeMs)
                     ellapsed_generate = time.time() - start_time
 
                     start_time = time.time()
-                    #'''
+                    #''' Comment this when testing without screen
                     # Open grab.jpg in PIL  
                     pil_im = Image.open(CURRENT_FRAME)
                     # Dither the image into a 1 bit bitmap (Just zeros and ones)
@@ -77,9 +75,10 @@ class SlowMoviePlayer:
 
             ellapsed = time.time() - start_time
 
-            logging.info('Movie:{} - Frame:{} of {} - Extracted:{:.1f} - Displayed:{:.1f}'
+            logging.info('Movie:{} - {} - Frame {} of {} - Extracted:{:.1f} - Displayed:{:.1f}'
                 .format(
                     self.smdata.movie if self.smdata.movieFile else None, 
+                    self.smdata.currentTimeHuman,
                     self.smdata.currentFrame, 
                     self.smdata.movieFrames, 
                     ellapsed_generate, 
@@ -93,7 +92,7 @@ class SlowMoviePlayer:
 
     def exit(self):
         logging.info("Clear screen")
-    #'''
+    #''' Comment this when testing without screen
         self.epd.Clear()
         self.epd.sleep()
     #'''

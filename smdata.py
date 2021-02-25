@@ -3,10 +3,15 @@ import os, time, random
 import ffmpeg
 import argparse
 import json
+import re
 import logging
 
+#If your movie is 30 frames per second, then a frame is 1/30th of a second, or 33.33 milliseconds
+#If your movie is 24 frames per second, then a frame is 1/24th of a second, or 41.66 milliseconds
+FRAME_CONSTANT = 41.666666
+
 # Data file to store player info
-DATA_FILE = 'slowmovie.data'
+DATA_FILE = 'slowmovie.json'
 
 # Ensure this is the correct path to your video folder 
 viddir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Videos/')
@@ -25,7 +30,6 @@ class SlowMovieData:
         self.__parseArgs()
         
         if not self.updateMovies():
-            logging.error("No movies :-( pleaee copy some MP4 in {}".format(viddir))
             quit()
 
     @property
@@ -61,7 +65,44 @@ class SlowMovieData:
     @property
     def movieFrames(self):
         """get total frames for current movie"""
-        return self.__movies[self.__movie]['frames']
+        return self.__movies[self.__movie]['totalFrames']
+
+    @property 
+    def currentTimeMs(self):
+        return "%dms"%(float(self.currentFrame)*FRAME_CONSTANT)
+
+    @property 
+    def currentTimeHuman(self):
+        return self.__getTimeHuman(self.currentFrame)
+
+    def __getTimeHuman(self, frame):
+        """Get human time from frame."""
+        millis = (float(frame)*FRAME_CONSTANT)
+
+        microseconds = (millis%1000)
+        seconds=(millis/1000)%60
+        minutes=(millis/(1000*60))%60
+        hours=(millis/(1000*60*60))%24
+        microseconds = int(microseconds)
+        seconds = int(seconds)
+        minutes = int(minutes)
+        hours = int(hours)
+
+        return "{:02d}:{:02d}:{:02d}.{:03d}".format(hours, minutes, seconds, microseconds) 
+
+    def __getFrameFromTime(self, time_str):
+        """Get frame from human time."""
+        try:
+            if time_str.find('.') < 0:
+                time_str += '.500'
+
+            hours, minutes, seconds, microseconds = re.split(':|\.',time_str)
+            totalSeconds = int(hours) * 3600 + int(minutes) * 60 + int(seconds)
+            millis = totalSeconds*1000+int(microseconds)
+            return int(millis/FRAME_CONSTANT)
+        except Exception as err:
+            logging.error("Could get frame from {}: {}".format(time_str, err))
+            return  None
 
     @property
     def currentFrame(self):
@@ -78,6 +119,7 @@ class SlowMovieData:
     def __currentFrame(self, frame):
         """set current frame for current movie"""
         self.__movies[self.__movie]['currentFrame'] = frame
+        self.__movies[self.__movie]['currentTime'] = self.currentTimeHuman
 
     def incrementFrame(self):
         """select next frame to display"""
@@ -241,6 +283,12 @@ class SlowMovieData:
         try:
             new_movie = json.loads(json_str)
 
+            # if we have human time and not frame
+            if 'time' in new_movie and not 'frame' in new_movie:
+                frame = self.__getFrameFromTime(new_movie['time'])
+                if frame:
+                    new_movie['frame'] = frame
+
             if 'name' in new_movie and new_movie['name'] in self.__movies.keys():
                 name = new_movie['name']
                 self.__movie = name
@@ -262,11 +310,17 @@ class SlowMovieData:
         try:
             favorite = json.loads(json_str)
 
+            # if we have human time and not frame
+            if 'time' in favorite and not 'frame' in favorite:
+                frame = self.__getFrameFromTime(favorite['time'])
+                if frame:
+                    favorite['frame'] = frame
+
             if 'id' in favorite:
                 if 'name' in favorite and 'frame' in favorite:
                     favName = favorite['name'] 
                     if favName in self.__movies.keys():
-                        if favorite['frame'] <= self.__movies[favName]['frames']:
+                        if favorite['frame'] <= self.__movies[favName]['totalFrames']:
                             return self._addFavorite(favName, favorite['frame'], favorite['id'])
                 else:
                     return self._addFavorite(self.__movie, self.currentFrame, favorite['id'])
@@ -283,7 +337,10 @@ class SlowMovieData:
             self.__movies[name]['favorites'] = {}
         
         #TODO check for errors
-        self.__movies[name]['favorites'][id] = frame
+        self.__movies[name]['favorites'][id] = {
+            'frame': frame,
+            'time': self.__getTimeHuman(frame)
+        }
 
         self.__save()
         return True
@@ -316,37 +373,58 @@ class SlowMovieData:
     def updateMovies(self):
         movieList = []
 
+        logging.info("**************** processing Movies")
         # update videos available 
         for file in os.listdir(viddir):
             if not file.startswith('.'):
                 movieList.append(file)
 
-                if not file in self.__movies:
-                    try:
-                        # Check how many frames are in the movie  and save for future use
-                        start_time = time.time()
-                        frameCount = int(ffmpeg.probe(viddir + file)['streams'][0]['nb_frames'])
-                        ellapsed = time.time() - start_time
-                        print(" * There are %d frames in %s. Calculated in %.1f secs." %(frameCount, file, ellapsed))
+                try:
+                    # Check how many frames are in the movie  and save for future use
+                    start_time = time.time()
+                    frameCount = int(ffmpeg.probe(viddir + file)['streams'][0]['nb_frames'])
+                    ellapsed = time.time() - start_time
 
-                        self.__movies[file] = {'frames': frameCount, 'currentFrame': 0}
-                    except ffmpeg.Error as e:
-                        logging.error("Could not read movie '{}': {}".format(file, e))
+                    if file in self.__movies:
+                        self.__movies[file]['totalFrames'] = frameCount;
+                        self.__movies[file]['totalTime'] = self.__getTimeHuman(frameCount)
+
+                    else :
+                        self.__movies[file] = {
+                            'totalFrames': frameCount, 
+                            'totalTime': self.__getTimeHuman(frameCount),
+                            'currentFrame': 0,
+                            'currentTime': self.__getTimeHuman(0)
+                        }
+
+                    logging.info(" * %s - Duration:%s - Frames:%d - Calculated in %.1f secs." %(
+                        file, 
+                        self.__movies[file]['totalTime'],
+                        self.__movies[file]['totalFrames'],
+                        ellapsed
+                    ))
+
+                except ffmpeg.Error as e:
+                    logging.error("Could not read movie '{}': {}".format(file, e))
         
         if not movieList:
             self.__movies = {}
             self.__movie = ''
+            logging.error("No movies :-( please copy some MP4 in {}".format(viddir))
             return False
 
         for movie in list(self.__movies.keys()):
             if not movie in movieList:
                 del self.__movies[movie]
+                logging.info("Delete non existing movie info {}".format(movie))
 
         # check if current movie is valid
         if self.__movie == '' or not self.__movie in self.__movies.keys():
             try:
+                logging.info("Current movie '{}' not valid".format(self.__movie))
                 selectedMovie = random.choice(list(self.__movies))
                 self.__movie = selectedMovie
+                logging.info("Updated current movie '{}'".format(self.__movie))
             except IndexError as e:
                 logging.error("Cannot choose from empty movie list {}".format(e))
 
