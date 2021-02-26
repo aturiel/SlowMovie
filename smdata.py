@@ -251,7 +251,10 @@ class SlowMovieData:
 
                 elif key.startswith('current_') and vars[key][0]:
                     name =  key[8:];
-                    self.__setCurrentFrame(name, int(vars[key][0]))
+                    frame = self.__getFrameFromTime(vars[key][0])
+                    # if param is frame
+                    #frame = int(vars[key][0])
+                    self.__setCurrentFrame(name, frame)
                     retValue = True
 
                 else:
@@ -290,7 +293,7 @@ class SlowMovieData:
         return retValue
 
     def setCurrentMovie(self, json_str):
-        """Update current movie info in json format {'name' : str, 'frame': int}"""
+        """Update current movie info in json format {'name': str, 'frame': int, 'time': str}"""
         try:
             new_movie = json.loads(json_str)
 
@@ -304,12 +307,12 @@ class SlowMovieData:
                 name = new_movie['name']
                 self.__movie = name
 
-                if 'frame' in new_movie and new_movie['frame'] <= self.movieFrames:
-                    self.__currentFrame = new_movie['frame']
-                    self.__skipNextIncrement = True
+            if 'frame' in new_movie and new_movie['frame'] <= self.movieFrames:
+                self.__currentFrame = new_movie['frame']
+                self.__skipNextIncrement = True
                 
-                self.__save()
-                return True
+            self.__save()
+            return True
 
         except ValueError as e:
             logging.error("Could not parse movie data: {}".format(e))
@@ -321,20 +324,26 @@ class SlowMovieData:
         try:
             favorite = json.loads(json_str)
 
-            # if we have human time and not frame
-            if 'time' in favorite and not 'frame' in favorite:
-                frame = self.__getFrameFromTime(favorite['time'])
-                if frame:
-                    favorite['frame'] = frame
 
             if 'id' in favorite:
-                if 'name' in favorite and 'frame' in favorite:
+                # if we have human time and not frame
+                if 'time' in favorite and not 'frame' in favorite:
+                    frame = self.__getFrameFromTime(favorite['time'])
+                    if frame:
+                        favorite['frame'] = frame
+
+                if 'name' in favorite:
                     favName = favorite['name'] 
-                    if favName in self.__movies.keys():
-                        if favorite['frame'] <= self.__movies[favName]['totalFrames']:
-                            return self._addFavorite(favName, favorite['frame'], favorite['id'])
                 else:
-                    return self._addFavorite(self.__movie, self.currentFrame, favorite['id'])
+                    favName = self.__movie
+
+                if 'frame' in favorite:
+                    frame = favorite['frame']
+                else:
+                    frame = self.currentFrame
+
+                if favName in self.__movies.keys() and frame <= self.__movies[favName]['totalFrames']:
+                    return self._addFavorite(favName, frame, favorite['id'])
 
         except ValueError as e:
             logging.error("Could not parse favorite: {}".format(e))

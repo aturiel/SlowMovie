@@ -1,77 +1,136 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
+    <!-- https://materializecss.com -->
     <title>Slow Movie</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <style type="text/css">
-      input.sm-max { max-width: 90%; }
-      label { font-weight: 800}
-      .w3-row-padding { padding-top: 2em; padding-bottom: 2em;}
-      .tbl-chk { width: 30px; }
-      .tbl-movie { max-width: 100%; }
-      .tbl-frames { width: 100px; }
-      .tbl-current { width: 100px; }
-    </style>
-  </head>
-  <body>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Material icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>  
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div class="w3-card-4">
-        <header class="w3-container w3-blue">
-            <h1>Slow Movie</h1>
-        </header>
-        <div class="w3-container">
-            <form action="/test" method="post" enctype="application/x-www-form-urlencoded">
-                <div class="w3-row-padding">
-                    <div class="w3-col s4">
-                        <label for="random">Random frames</label><br/>
-                        <input class="w3-check" type="checkbox" id="random" name="random" value="random" 
-                            {% if smData.random == true %}
-                                checked
-                            {% endif %} 
-                        >
-                    </div>
-                    <div class="w3-col s4">
-                        <label for="increment">Frame increment</label>
-                        <input class="w3-input sm-max w3-right-align" placeholder="Two" type="number" id="increment" name="increment" value="{{smData.increment}}">
-                    </div>
-                    <div class="w3-col s4">
-                        <label for="delay">Delay</label>
-                        <input class="w3-input sm-max w3-right-align" placeholder="Three" type="number" id="delay" name="delay" value="{{smData.delay}}">
+    <style>
+    .row.sm-movie-header {
+        margin-bottom: 0.5em;
+    }
+    .row.sm-movie {
+        padding: 1em 1em 0em 1em;
+        margin-bottom: 0;
+    }
+    .row.sm-movie:first-of-type {
+        border-radius: 4px 4px 0 0;
+    }
+    .row.sm-movie:last-of-type {
+        margin-bottom: 2em;
+        border-radius: 0 0 4px 4px;
+    }
+    .row.sm-movie.odd {
+        background-color: #eceff1;  /* blue-grey lighten-5 */
+    }
+    .row.sm-movie.even {
+        background-color: #cfd8dc;  /* blue-grey lighten-4 */
+    }
+    .sm-movie-title>label>span{
+        font-size:2rem !important;
+        color: #004d40; /* teal darken-4 */
+    }
+    .sm-general-settings {
+    }
+    </style>
+</head>
+
+<body>
+    <form action="/form" class="col s12" method="post" enctype="application/x-www-form-urlencoded">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h2 class="left-align">Very Slow Movie Player</h2>
+                </div>
+            </div>
+
+            <div class="row sm-general-settings">
+                <div class="col s12">
+                    <div class="row">
+                        <div class="input-field col s4 sm-random">
+                            <label>
+                                <input type="checkbox" class="filled-in" id="random" name="random" value="random" 
+                                    {% if smData.random == true %}
+                                        checked="checked" 
+                                    {% endif %} 
+                                />
+                                <span>Random frames</span>
+                            </label>
+                        </div>
+
+                        <div class="input-field col s4 sm-increment">
+                            <input placeholder="Seconds" type="number" class="validate" id="increment" name="increment" value="{{smData.increment}}"/>
+                            <label for="increment">Frame increment</label>
+                        </div>
+
+                        <div class="input-field col s4 sm-delay">
+                            <input placeholder="Seconds" type="number" class="validate" id="delay" name="delay" value="{{smData.delay}}"/>
+                            <label for="delay">Delay</label>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <table class="w3-table">
-                    <tr>
-                        <th class="tbl-chk"><label>Current</label></th>
-                        <th class="tbl-movie w3-right-align"><label>Movies</label></div>
-                        <th class="tbl-frames w3-right-align"><label>Frames</label></th>
-                        <th class="tbl-frames w3-right-align"><label>Time</label></th>
-                        <th class="tbl-current w3-right-align"><label>Current</label></th>
-                    </tr>
+            <div class="row sm-movie-header">
+                <h3 class="left-align">Movies</h3>
+            </div>
 
-                    {% for key, value in smData.movies.items() %}
-                        <tr>
-                            <td class="tbl-chk" >
-                                <input class="s1 w3-radio" type="radio" id="{{key}}" name="movie" value="{{key}}" 
+            {% for key, value in smData.movies.items() %}
+                <div class="row sm-movie {{ loop.cycle('odd', 'even') }}">
+                    <div class="col s8">
+                        <div class="row sm-movie-title">
+                            <label>
+                                <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
                                     {% if key == smData.movie %}
-                                        checked
+                                        checked="checked" 
                                     {% endif %} 
-                                >
-                            </td>
-                            <td class="tbl-movie w3-right-align">{{key}}</td>
-                            <td class="tbl-frames w3-right-align">{{value.totalFrames}}</td>
-                            <td class="tbl-frames w3-right-align">{{value.totalTime}}</td>
-                            <td class="tbl-current w3-right-align">
-                                <input class="w3-input w3-right-align" type="number" id="current_{{key}}" name="current_{{key}}" value="{{value.currentFrame}}">
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
+                                />
+                                <span>{{key}}</span>
+                            </label>
+                        </div>
+                        <div class="row">
+                            <div class="col s5 offset-s1 right-align movie-frames-lbl">Total frames</div>
+                            <div class="col s6 sm-movie-frames">{{value.totalFrames}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col s5 offset-s1 right-align movie-duration-lbl ">Duration</div>
+                            <div class="col s6 sm-movie-duration">{{value.totalTime}}</div>
+                        </div>
+                    </div>
 
-                <button class="w3-btn w3-section" type="submit" >Submit</button>
-            </form> 
+                    <div class="input-field col s4 sm-movie-current-time">
+                        <input placeholder="hh:mm:ss.SSS" type="time" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
+                        <label for="current_{{key}}">Current Time</label>
+                    </div>
+                </div>
+            {% endfor %}
+            <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                <i class="material-icons right">send</i>
+            </button>
         </div>
-    </div>
-  </body>
+    </form>
+    <br/>
+    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col s5 offset-s1 valign-wrapper">
+                        Very Slow Movie Player
+                    </div>
+                    <div class="col s6 right-align">
+                        <a class="github-button right" href="https://github.com/aturiel/SlowMovie" data-size="large" aria-label="Star aturiel/SlowMovie on GitHub">Star</a>
+                    </div>
+                </div>
+            </div>
+    </footer>
+</body>
 </html>

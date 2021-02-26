@@ -103,7 +103,7 @@ class S(BaseHTTPRequestHandler):
         #    if smData.__setJson(post_data):
         #        response = 200
         
-        elif self.path.startswith('/test'):
+        elif self.path.startswith('/form'):
             logging.info("test")
             postvars = parse_qs(post_data,keep_blank_values=1)
             smData.setFormData(postvars);
