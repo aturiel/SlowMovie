@@ -94,7 +94,7 @@
                                         checked="checked" 
                                     {% endif %} 
                                 />
-                                <span>{{key}}</span>
+                                <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
                             </label>
                         </div>
                         <div class="row">
@@ -108,7 +108,7 @@
                     </div>
 
                     <div class="input-field col s4 sm-movie-current-time">
-                        <input placeholder="hh:mm:ss.SSS" type="time" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
+                        <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
                         <label for="current_{{key}}">Current Time</label>
                     </div>
                 </div>
