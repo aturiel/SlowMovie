@@ -13,12 +13,15 @@
 import time 
 import ffmpeg
 import logging
+import platform
 
-#''' Comment this when testing without screen
-from PIL import Image
-# Ensure this is the correct import for your particular screen 
-from waveshare_epd import epd7in5_V2
-#'''
+# identify  PI vs  my developement machine
+DEBUG_MODE = platform.machine() != 'armv7l'
+
+if not DEBUG_MODE:
+    from PIL import Image
+    # Ensure this is the correct import for your particular screen 
+    from waveshare_epd import epd7in5_V2
 
 CURRENT_FRAME = 'grab.jpg'
 
@@ -30,14 +33,12 @@ class SlowMoviePlayer:
     def __init__(self, data):
         self.smdata = data
 
-        #''' Comment this when testing without screen
-        # Ensure this is the correct driver for your particular screen 
-        self.epd = epd7in5_V2.EPD()
-
-        # Initialise and clear the screen 
-        self.epd.init()
-        #epd.Clear()
-        #'''
+        if not DEBUG_MODE:
+            # Ensure this is the correct driver for your particular screen 
+            self.epd = epd7in5_V2.EPD()
+            # Initialise and clear the screen 
+            self.epd.init()
+            #epd.Clear()
 
     def generate_frame(self, in_filename, out_filename, time, width=WIDTH, height=HEIGHT): 
         (
@@ -58,16 +59,16 @@ class SlowMoviePlayer:
                     # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
                     self.generate_frame(self.smdata.movieFile, CURRENT_FRAME, self.smdata.currentTimeMs)
                     ellapsed_generate = time.time() - start_time
-
                     start_time = time.time()
-                    #''' Comment this when testing without screen
-                    # Open grab.jpg in PIL  
-                    pil_im = Image.open(CURRENT_FRAME)
-                    # Dither the image into a 1 bit bitmap (Just zeros and ones)
-                    pil_im = pil_im.convert(mode='1',dither=Image.FLOYDSTEINBERG)
-                    # display the image 
-                    self.epd.display(self.epd.getbuffer(pil_im))
-                    #'''
+
+                    if not DEBUG_MODE:
+                        # Open grab.jpg in PIL
+                        pil_im = Image.open(CURRENT_FRAME)
+                        # Dither the image into a 1 bit bitmap (Just zeros and ones)
+                        pil_im = pil_im.convert(mode='1',dither=Image.FLOYDSTEINBERG)
+                        # display the image 
+                        self.epd.display(self.epd.getbuffer(pil_im))
+
                 except ffmpeg.Error as e:
                     logging.error("Could not read movie '{}': {}".format(self.smdata.movieFile, e))
                 except:
@@ -92,7 +93,7 @@ class SlowMoviePlayer:
 
     def exit(self):
         logging.info("Clear screen")
-    #''' Comment this when testing without screen
-        self.epd.Clear()
-        self.epd.sleep()
-    #'''
+
+        if not DEBUG_MODE:
+            self.epd.Clear()
+            self.epd.sleep()
