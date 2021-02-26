@@ -111,15 +111,23 @@ class SlowMovieData:
             return random.randint(0,self.movieFrames)
         else: 
             if self.__movie in self.__movies:
-                return self.__movies[self.__movie]['currentFrame']
+                frame = self.__movies[self.__movie]['currentFrame']
+                frame = frame if frame and type(frame) == int else 0
+                return frame
             else:
                 return None
 
     @currentFrame.setter
     def __currentFrame(self, frame):
         """set current frame for current movie"""
-        self.__movies[self.__movie]['currentFrame'] = frame
-        self.__movies[self.__movie]['currentTime'] = self.currentTimeHuman
+        self.__setCurrentFrame(self.__movie, frame)
+
+    def __setCurrentFrame(self, movie, frame):
+        """set current frame for indicated movie"""
+        if movie in self.__movies:
+            frame = frame if frame and type(frame) == int else 0
+            self.__movies[movie]['currentFrame'] = frame
+            self.__movies[movie]['currentTime'] = self.__getTimeHuman(frame)
 
     def incrementFrame(self):
         """select next frame to display"""
@@ -236,11 +244,14 @@ class SlowMovieData:
                     retValue = True
 
                 elif key == 'movie':
-                    if vars[key][0] in self.__movies.keys():
+                    if vars[key][0] in self.__movies:
                         self.__movie = vars[key][0]
-                        if 'frame' in vars and vars['frame'][0] <= self.movieFrames:
-                            self.__currentFrame = vars['frame'][0]
-                            self.__skipNextIncrement = True
+                        self.__skipNextIncrement = True
+                        retValue = True
+
+                elif key.startswith('current_') and vars[key][0]:
+                    name =  key[8:];
+                    self.__setCurrentFrame(name, int(vars[key][0]))
                     retValue = True
 
                 else:
@@ -393,9 +404,8 @@ class SlowMovieData:
                         self.__movies[file] = {
                             'totalFrames': frameCount, 
                             'totalTime': self.__getTimeHuman(frameCount),
-                            'currentFrame': 0,
-                            'currentTime': self.__getTimeHuman(0)
                         }
+                        self.__setCurrentFrame(file, 0)
 
                     logging.info(" * %s - Duration:%s - Frames:%d - Calculated in %.1f secs." %(
                         file, 

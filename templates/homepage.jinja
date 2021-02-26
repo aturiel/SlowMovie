@@ -46,22 +46,24 @@
                         <th class="tbl-chk"><label>Current</label></th>
                         <th class="tbl-movie w3-right-align"><label>Movies</label></div>
                         <th class="tbl-frames w3-right-align"><label>Frames</label></th>
+                        <th class="tbl-frames w3-right-align"><label>Time</label></th>
                         <th class="tbl-current w3-right-align"><label>Current</label></th>
                     </tr>
 
                     {% for key, value in smData.movies.items() %}
                         <tr>
                             <td class="tbl-chk" >
-                                <input class="s1" type="checkbox" id="{{key}}" name="{{key}}" value="{{key}}" 
+                                <input class="s1 w3-radio" type="radio" id="{{key}}" name="movie" value="{{key}}" 
                                     {% if key == smData.movie %}
                                         checked
                                     {% endif %} 
                                 >
                             </td>
                             <td class="tbl-movie w3-right-align">{{key}}</td>
-                            <td class="tbl-frames w3-right-align">{{value.frames}}</td>
+                            <td class="tbl-frames w3-right-align">{{value.totalFrames}}</td>
+                            <td class="tbl-frames w3-right-align">{{value.totalTime}}</td>
                             <td class="tbl-current w3-right-align">
-                                <input class="w3-input w3-right-align" type="number" id="{{key}}_current" name="{{key}}_current" value="{{value.currentFrame}}">
+                                <input class="w3-input w3-right-align" type="number" id="current_{{key}}" name="current_{{key}}" value="{{value.currentFrame}}">
                             </td>
                         </tr>
                     {% endfor %}
