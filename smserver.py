@@ -14,11 +14,11 @@ from urllib.parse import parse_qs
 import jinja2 
 import logging
 
+from system_info import getSystemInfo
 from smdata import SlowMovieData
 from smplayer import SlowMoviePlayer, CURRENT_FRAME
 
 smData = None
-
 class S(BaseHTTPRequestHandler):
     def __set_response(self, response = 200):
         self.send_response(response)
@@ -35,6 +35,13 @@ class S(BaseHTTPRequestHandler):
             self.wfile.write(json_str.encode(encoding='utf_8'))
 
             #logging.info("GET [{}] >>> {}".format(self.path, json_str))
+
+        elif self.path == '/system':
+            json_str = getSystemInfo()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json_str.encode(encoding='utf_8'))
 
         elif self.path == '/frame':
             try:
@@ -167,6 +174,9 @@ class SlowMovieServer:
         print('Press Ctrl+C to exit')
 
         logging.basicConfig(level=logging.INFO)
+
+        logging.info("Slow Movie Player")
+        logging.info(getSystemInfo())
 
         global smData
         smData = SlowMovieData()
