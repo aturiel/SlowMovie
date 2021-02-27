@@ -20,6 +20,7 @@ from smdata import SlowMovieData
 from smplayer import SlowMoviePlayer
 
 smData = None
+smPlayer = None
 class S(BaseHTTPRequestHandler):
     def __set_response(self, response = 200):
         self.send_response(response)
@@ -151,7 +152,7 @@ class S(BaseHTTPRequestHandler):
         templateLoader = jinja2.FileSystemLoader(searchpath="./")
         templateEnv = jinja2.Environment(loader=templateLoader)
         template = templateEnv.get_template("./templates/homepage.jinja")
-        outputText = template.render(smData=smData.configToDict())  # this is where to put args to the template renderer
+        outputText = template.render({'smData':smData.configToDict(), 'lastUpdate':smPlayer.lastUpdate})  # this is where to put args to the template renderer
         return outputText
 
 class SlowMovieServer:
@@ -185,7 +186,7 @@ class SlowMovieServer:
         logging.info("Slow Movie Player")
         logging.info(getSystemInfo())
 
-        global smData
+        global smData, smPlayer
         smData = SlowMovieData()
 
         daemon = threading.Thread(
@@ -195,8 +196,8 @@ class SlowMovieServer:
         daemon.setDaemon(True) # Set as a daemon so it will be killed once the main thread is dead.
         daemon.start()
 
-        self.smPlayer = SlowMoviePlayer(smData)
-        self.smPlayer.play()
+        smPlayer = SlowMoviePlayer(smData)
+        smPlayer.play()
 
 if __name__ == '__main__':
     SlowMovieServer();

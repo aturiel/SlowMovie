@@ -13,6 +13,8 @@
 import time 
 import logging
 import platform
+import ffmpeg
+from datetime import datetime
 
 from smframes import generate_frame
 
@@ -27,6 +29,7 @@ if not DEBUG_MODE:
 class SlowMoviePlayer:
     def __init__(self, data):
         self.smdata = data
+        self.__lastUpdate = datetime.now()
 
         if not DEBUG_MODE:
             # Ensure this is the correct driver for your particular screen 
@@ -35,6 +38,10 @@ class SlowMoviePlayer:
             self.epd.init()
             #epd.Clear()
 
+    @property
+    def lastUpdate(self):
+        return self.__lastUpdate
+
     def play(self):
         while True: 
             start_time = time.time()
@@ -42,6 +49,7 @@ class SlowMoviePlayer:
                 try:
                     # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
                     generate_frame(self.smdata.movieFile, self.smdata.currentFrameImage, self.smdata.currentTimeMs)
+                    self.__lastUpdate = datetime.now()
                     ellapsed_generate = time.time() - start_time
                     start_time = time.time()
 
@@ -60,14 +68,15 @@ class SlowMoviePlayer:
 
             ellapsed = time.time() - start_time
 
-            logging.info('Movie:{} - {} - Frame {} of {} - Extracted:{:.1f} - Displayed:{:.1f}'
+            logging.info('Movie:{} - {} - Frame {} of {} - Extracted:{:.1f} - Displayed:{:.1f} - {}'
                 .format(
                     self.smdata.movie if self.smdata.movieFile else None, 
                     self.smdata.currentTimeHuman,
                     self.smdata.currentFrame, 
                     self.smdata.movieFrames, 
                     ellapsed_generate, 
-                    ellapsed
+                    ellapsed,
+                    self.__lastUpdate.strftime("%H:%M:%S")
                 ))
 
             time.sleep(self.smdata.delay)
