@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Material icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>  
     
@@ -17,6 +15,20 @@
     <style>
     .row.sm-movie-header {
         margin-bottom: 0.5em;
+    }
+    .sm-general-settings {
+        padding-bottom: 3ex;
+    }
+    .sm-general-settings .row {
+        margin-bottom: 5px;
+    }
+    .sm-general-settings-inputs .input-field {
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    .sm-general-settings-inputs .input-field input {
+        padding-bottom: 0;
+        margin-bottom: 0.2rem;
     }
     .row.sm-movie {
         padding: 1em 1em 0em 1em;
@@ -35,12 +47,32 @@
     .row.sm-movie.even {
         background-color: #cfd8dc;  /* blue-grey lighten-4 */
     }
-    .sm-movie-title>label>span{
+    .sm-movie-title {
+        text-align: right;
+    }
+    .sm-movie-title>label>span {
         font-size:2rem !important;
         color: #004d40; /* teal darken-4 */
     }
-    .sm-general-settings {
+    /* Radios of the right */
+    .sm-movie-title [type="radio"]+span:before, 
+    .sm-movie-title [type="radio"]+span:after {
+        right:0;
+        left: auto;
     }
+    .sm-movie-title [type="radio"]:not(:checked)+span, 
+    .sm-movie-title [type="radio"]:checked+span {
+        padding-right: 1em;
+        padding-left: 0;
+    }
+    /*
+    [type="radio"]:not(:checked), [type="radio"]:checked {
+        position: relative; 
+        opacity: 1; 
+    .sm-movie-title {
+        text-align: right;
+    }
+    */
     </style>
 </head>
 
@@ -54,28 +86,33 @@
             </div>
 
             <div class="row sm-general-settings">
-                <div class="col s12">
-                    <div class="row">
-                        <div class="input-field col s4 sm-random">
-                            <label>
-                                <input type="checkbox" class="filled-in" id="random" name="random" value="random" 
-                                    {% if smData.random == true %}
-                                        checked="checked" 
-                                    {% endif %} 
-                                />
-                                <span>Random frames</span>
-                            </label>
-                        </div>
+                <div class="row sm-general-settings-inputs">
+                    <div class="sm-random input-field col s4 offset-m1 m3 offset-l3 l2">
+                        <label>
+                            <input type="checkbox" class="filled-in" id="random" name="random" value="random" 
+                                {% if smData.random == true %}
+                                    checked="checked" 
+                                {% endif %} />
+                            <span></span>
+                        </label>
+                    </div>
+                    <div class="sm-increment input-field col s4 m3 l2">
+                        <input placeholder="Seconds" type="number" class="validate" id="increment" name="increment" value="{{smData.increment}}"/>
+                    </div>
+                    <div class="sm-delay input-field col s4 m3 l2">
+                        <input placeholder="Seconds" type="number" class="validate" id="delay" name="delay" value="{{smData.delay}}"/>
+                    </div>
+                </div>
+                <div class="row sm-general-settings-labels">
+                    <div class="sm-random col s4 offset-m1 m3 offset-l3 l2">
+                        <span>Chooses a random frame every refresh</span>
+                    </div>
 
-                        <div class="input-field col s4 sm-increment">
-                            <input placeholder="Seconds" type="number" class="validate" id="increment" name="increment" value="{{smData.increment}}"/>
-                            <label for="increment">Frame increment</label>
-                        </div>
-
-                        <div class="input-field col s4 sm-delay">
-                            <input placeholder="Seconds" type="number" class="validate" id="delay" name="delay" value="{{smData.delay}}"/>
-                            <label for="delay">Delay</label>
-                        </div>
+                    <div class="sm-increment col s4 m3 l2">
+                        <span>Number of frames skipped between screen updates</span>
+                    </div>
+                    <div class="sm-delay col s4 m3 l2">
+                        <span>Delay between screen updates</span>
                     </div>
                 </div>
             </div>
@@ -86,7 +123,7 @@
 
             {% for key, value in smData.movies.items() %}
                 <div class="row sm-movie {{ loop.cycle('odd', 'even') }}">
-                    <div class="col s8">
+                    <div class="col s7">
                         <div class="row sm-movie-title">
                             <label>
                                 <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
@@ -97,6 +134,7 @@
                                 <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
                             </label>
                         </div>
+                        <!--
                         <div class="row">
                             <div class="col s5 offset-s1 right-align movie-frames-lbl">Total frames</div>
                             <div class="col s6 sm-movie-frames">{{value.totalFrames}}</div>
@@ -105,11 +143,12 @@
                             <div class="col s5 offset-s1 right-align movie-duration-lbl ">Duration</div>
                             <div class="col s6 sm-movie-duration">{{value.totalTime}}</div>
                         </div>
+                        -->
                     </div>
 
-                    <div class="input-field col s4 sm-movie-current-time">
+                    <div class="input-field col s5 sm-movie-current-time">
                         <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
-                        <label for="current_{{key}}">Current Time</label>
+                        <label for="current_{{key}}">Displayed frame (Total {{value.totalTime[0:8]}})</label>
                     </div>
                 </div>
             {% endfor %}
@@ -132,5 +171,8 @@
                 </div>
             </div>
     </footer>
+
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>
