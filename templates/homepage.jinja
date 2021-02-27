@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-    .row.sm-movie-header {
+    .sm-movie-header {
         margin-bottom: 0.5em;
     }
     .sm-general-settings {
@@ -30,21 +30,30 @@
         padding-bottom: 0;
         margin-bottom: 0.2rem;
     }
-    .row.sm-movie {
+    .sm-random.input-field label {
+        left:45%;
+    }
+    .sm-general-settings-labels {
+        color:#607d8b /* blue-grey */
+    }
+    .sm-general-settings-labels div {
+        text-align: center;
+    }
+    .sm-movie {
         padding: 1em 1em 0em 1em;
         margin-bottom: 0;
     }
-    .row.sm-movie:first-of-type {
+    .sm-movie:first-of-type {
         border-radius: 4px 4px 0 0;
     }
-    .row.sm-movie:last-of-type {
+    .sm-movie:last-of-type {
         margin-bottom: 2em;
         border-radius: 0 0 4px 4px;
     }
-    .row.sm-movie.odd {
+    .sm-movie.odd {
         background-color: #eceff1;  /* blue-grey lighten-5 */
     }
-    .row.sm-movie.even {
+    .sm-movie.even {
         background-color: #cfd8dc;  /* blue-grey lighten-4 */
     }
     .sm-movie-title {
@@ -65,14 +74,15 @@
         padding-right: 1em;
         padding-left: 0;
     }
-    /*
-    [type="radio"]:not(:checked), [type="radio"]:checked {
-        position: relative; 
-        opacity: 1; 
-    .sm-movie-title {
-        text-align: right;
+    .sm-frame {
+        padding: 0 !important;
+        margin: 0;
     }
-    */
+    .sm-frame img {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 4px;
+    }
     </style>
 </head>
 
@@ -87,7 +97,7 @@
 
             <div class="row sm-general-settings">
                 <div class="row sm-general-settings-inputs">
-                    <div class="sm-random input-field col s4 offset-m1 m3 offset-l3 l2">
+                    <div class="sm-random input-field col offset-s1 s2">
                         <label>
                             <input type="checkbox" class="filled-in" id="random" name="random" value="random" 
                                 {% if smData.random == true %}
@@ -96,22 +106,22 @@
                             <span></span>
                         </label>
                     </div>
-                    <div class="sm-increment input-field col s4 m3 l2">
+                    <div class="sm-increment input-field col offset-s2 s2">
                         <input placeholder="Seconds" type="number" class="validate" id="increment" name="increment" value="{{smData.increment}}"/>
                     </div>
-                    <div class="sm-delay input-field col s4 m3 l2">
+                    <div class="sm-delay input-field col offset-s2 s2">
                         <input placeholder="Seconds" type="number" class="validate" id="delay" name="delay" value="{{smData.delay}}"/>
                     </div>
                 </div>
                 <div class="row sm-general-settings-labels">
-                    <div class="sm-random col s4 offset-m1 m3 offset-l3 l2">
+                    <div class="sm-random col s4">
                         <span>Chooses a random frame every refresh</span>
                     </div>
 
-                    <div class="sm-increment col s4 m3 l2">
+                    <div class="sm-increment col s4">
                         <span>Number of frames skipped between screen updates</span>
                     </div>
-                    <div class="sm-delay col s4 m3 l2">
+                    <div class="sm-delay col s4">
                         <span>Delay between screen updates</span>
                     </div>
                 </div>
@@ -122,35 +132,43 @@
             </div>
 
             {% for key, value in smData.movies.items() %}
-                <div class="row sm-movie {{ loop.cycle('odd', 'even') }}">
-                    <div class="col s7">
-                        <div class="row sm-movie-title">
-                            <label>
-                                <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
-                                    {% if key == smData.movie %}
-                                        checked="checked" 
-                                    {% endif %} 
-                                />
-                                <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
-                            </label>
-                        </div>
-                        <!--
-                        <div class="row">
-                            <div class="col s5 offset-s1 right-align movie-frames-lbl">Total frames</div>
-                            <div class="col s6 sm-movie-frames">{{value.totalFrames}}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col s5 offset-s1 right-align movie-duration-lbl ">Duration</div>
-                            <div class="col s6 sm-movie-duration">{{value.totalTime}}</div>
-                        </div>
-                        -->
-                    </div>
-
-                    <div class="input-field col s5 sm-movie-current-time">
-                        <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
-                        <label for="current_{{key}}">Displayed frame (Total {{value.totalTime[0:8]}})</label>
-                    </div>
+            <div class="row sm-movie {{ loop.cycle('odd', 'even') }}">
+                {% if key == smData.movie %}
+                <div class="col s2 sm-frame">
+                    <a href="frame/current.jpg">
+                        {# generate a random id so the current image is not cached #}
+                        <img src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
+                    </a>
                 </div>
+                <div class="col s5 sm-movie-title">
+                {% else %}
+                <div class="col s7 sm-movie-title">
+                {% endif %} 
+                    <label>
+                        <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
+                            {% if key == smData.movie %}
+                                checked="checked" 
+                            {% endif %} 
+                        />
+                        <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
+                    </label>
+                </div>
+                    <!--
+                    <div class="row">
+                        <div class="col s5 offset-s1 right-align movie-frames-lbl">Total frames</div>
+                        <div class="col s6 sm-movie-frames">{{value.totalFrames}}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col s5 offset-s1 right-align movie-duration-lbl ">Duration</div>
+                        <div class="col s6 sm-movie-duration">{{value.totalTime}}</div>
+                    </div>
+                    -->
+
+                <div class="input-field col s5 sm-movie-current-time">
+                    <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
+                    <label for="current_{{key}}">Displayed frame (Total {{value.totalTime[0:8]}})</label>
+                </div>
+            </div>
             {% endfor %}
             <button class="btn waves-effect waves-light" type="submit" name="action">Submit
                 <i class="material-icons right">send</i>

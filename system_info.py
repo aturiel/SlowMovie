@@ -51,5 +51,5 @@ def getSystemInfo():
         info['ram-free']=get_size(svmem.available)
         info['disk_partitions']=diskPartitions
         return json.dumps(info,indent=4, separators=(',', ': '))
-    except Exception as e:
-        logging.exception(e)
+    except Exception as ex:
+        logging.error("Can't generate SystemInfo >>> {}".format(ex))

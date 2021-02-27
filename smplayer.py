@@ -11,9 +11,10 @@
 # *************************
 
 import time 
-import ffmpeg
 import logging
 import platform
+
+from smframes import generate_frame
 
 # identify  PI vs  my developement machine
 DEBUG_MODE = platform.machine() != 'armv7l'
@@ -22,12 +23,6 @@ if not DEBUG_MODE:
     from PIL import Image
     # Ensure this is the correct import for your particular screen 
     from waveshare_epd import epd7in5_V2
-
-CURRENT_FRAME = 'grab.jpg'
-
-# if videos size matches your particular screen  (epd.width, epd.height) generate_frame will be faster
-WIDTH = 800
-HEIGHT = 480 
 
 class SlowMoviePlayer:
     def __init__(self, data):
@@ -40,39 +35,28 @@ class SlowMoviePlayer:
             self.epd.init()
             #epd.Clear()
 
-    def generate_frame(self, in_filename, out_filename, time, width=WIDTH, height=HEIGHT): 
-        (
-            ffmpeg
-            .input(in_filename, ss=time)
-            .filter('scale', width, height, force_original_aspect_ratio=1)
-            .filter('pad', width, height, -1, -1)
-            .output(out_filename, vframes=1)
-            .overwrite_output()
-            .run(capture_stdout=True, capture_stderr=True)
-        )
-
     def play(self):
         while True: 
             start_time = time.time()
             if self.smdata.movieFile:
                 try:
                     # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
-                    self.generate_frame(self.smdata.movieFile, CURRENT_FRAME, self.smdata.currentTimeMs)
+                    generate_frame(self.smdata.movieFile, self.smdata.currentFrameImage, self.smdata.currentTimeMs)
                     ellapsed_generate = time.time() - start_time
                     start_time = time.time()
 
                     if not DEBUG_MODE:
                         # Open grab.jpg in PIL
-                        pil_im = Image.open(CURRENT_FRAME)
+                        pil_im = Image.open(self.smdata.currentFrameImage)
                         # Dither the image into a 1 bit bitmap (Just zeros and ones)
                         pil_im = pil_im.convert(mode='1',dither=Image.FLOYDSTEINBERG)
                         # display the image 
                         self.epd.display(self.epd.getbuffer(pil_im))
 
                 except ffmpeg.Error as e:
-                    logging.error("Could not read movie '{}': {}".format(self.smdata.movieFile, e))
-                except:
-                    logging.error("Could not process frame")
+                    logging.error("Could not read movie '{}' >>> {}".format(self.smdata.movieFile, e))
+                except Exception as ex:
+                    logging.error("Could not process current frame >>> {}".format(ex))
 
             ellapsed = time.time() - start_time
 

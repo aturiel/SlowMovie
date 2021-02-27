@@ -13,10 +13,11 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 import jinja2 
 import logging
+import re
 
 from system_info import getSystemInfo
 from smdata import SlowMovieData
-from smplayer import SlowMoviePlayer, CURRENT_FRAME
+from smplayer import SlowMoviePlayer
 
 smData = None
 class S(BaseHTTPRequestHandler):
@@ -43,13 +44,19 @@ class S(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json_str.encode(encoding='utf_8'))
 
-        elif self.path == '/frame':
+        elif self.path.startswith('/frame/'):
             try:
-                file_data = self.__retrieve_image(CURRENT_FRAME)
+                substring = re.search("/frame/(.*?)\?dummy=", self.path)
+                if( substring):
+                    name = substring.group(1)
+                else:
+                    name = self.path[7:]
+
+                file_data = self.__retrieve_image(smData.frameDir + name)
                 file_data_len = len(file_data)
 
             except Exception as ex:
-                logging.error("GET [{}] >>> {}".format(self.path, ex))
+                logging.error("GET frame [{}] >>> {}".format(name, ex))
                 self.send_error(404)
                 self.end_headers()
                 self.wfile.write("File not found")

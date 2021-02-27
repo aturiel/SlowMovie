@@ -6,6 +6,8 @@ import json
 import re
 import logging
 
+from smframes import generate_frame
+
 #If your movie is 30 frames per second, then a frame is 1/30th of a second, or 33.33 milliseconds
 #If your movie is 24 frames per second, then a frame is 1/24th of a second, or 41.66 milliseconds
 FRAME_CONSTANT = 41.666666
@@ -15,6 +17,9 @@ DATA_FILE = 'slowmovie.json'
 
 # Ensure this is the correct path to your video folder 
 viddir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Videos/')
+framesdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Frames/')
+
+CURRENT_FRAME = 'current.jpg'
 
 class SlowMovieData:
     __random: bool = False
@@ -53,6 +58,16 @@ class SlowMovieData:
     #    self.__movie = value
 
     @property
+    def frameDir(self):
+        if not os.path.exists(framesdir):
+            os.makedirs(framesdir)
+        return framesdir;
+
+    @property
+    def currentFrameImage(self):
+        return self.frameDir + CURRENT_FRAME
+
+    @property
     def movieFile(self):
         """get current movie video file"""
         if self.__movie in self.__movies:
@@ -69,7 +84,10 @@ class SlowMovieData:
 
     @property 
     def currentTimeMs(self):
-        return "%dms"%(float(self.currentFrame)*FRAME_CONSTANT)
+        return self.__getTimeMs(self.currentFrame)
+
+    def __getTimeMs(self, frame):
+        return "%dms"%(float(frame)*FRAME_CONSTANT)
 
     @property 
     def currentTimeHuman(self):
@@ -101,7 +119,7 @@ class SlowMovieData:
             millis = totalSeconds*1000+int(microseconds)
             return int(millis/FRAME_CONSTANT)
         except Exception as err:
-            logging.error("Could get frame from {}: {}".format(time_str, err))
+            logging.error("Could get frame from {} >>> {}".format(time_str, err))
             return  None
 
     @property
@@ -184,7 +202,7 @@ class SlowMovieData:
         try:
             f = open(DATA_FILE, 'w', encoding='utf-8')
         except OSError as err:
-            logging.error("Could not save {}: {}".format(DATA_FILE, err))
+            logging.error("Could not save {} >>> {}".format(DATA_FILE, err))
             return False
 
         with f:
@@ -197,7 +215,7 @@ class SlowMovieData:
         try:
             f = open(DATA_FILE, 'r', encoding='utf-8')
         except OSError as err:
-            logging.error("Could not load {}: {}".format(DATA_FILE, err))
+            logging.error("Could not load {} >>> {}".format(DATA_FILE, err))
             return False
 
         with f:
@@ -205,7 +223,7 @@ class SlowMovieData:
                 self.__configFromDict(json.load(f))
 
             except ValueError as err:
-                logging.error("Could not load {}: {}".format(DATA_FILE, err))
+                logging.error("Could not load {} >>> {}".format(DATA_FILE, err))
                 return False
         return True
 
@@ -219,7 +237,7 @@ class SlowMovieData:
             self.__configFromDict(json.loads(json_str))
             return True
         except ValueError as e:
-            logging.error("Could not parse json settings: {}".format(e))
+            logging.error("Could not parse json settings >>> {}".format(e))
             return False
 
     def setFormData(self, vars):
@@ -261,7 +279,7 @@ class SlowMovieData:
                     logging.info("Could not parse post variable: {}:{}".format(key, vars[key]))
 
         except ValueError as e:
-            logging.error("Could not parse form data: {}".format(vars))
+            logging.error("Could not parse form data >>> {}".format(vars))
 
         if retValue:
             self.__save()
@@ -285,7 +303,7 @@ class SlowMovieData:
                 retValue = True
 
         except ValueError as e:
-            logging.error("Could not parse json config: {}".format(e))
+            logging.error("Could not parse json config >>> {}".format(e))
 
         if retValue:
             self.__save()
@@ -315,7 +333,7 @@ class SlowMovieData:
             return True
 
         except ValueError as e:
-            logging.error("Could not parse movie data: {}".format(e))
+            logging.error("Could not parse movie data >>> {}".format(e))
         
         return False
 
@@ -343,24 +361,33 @@ class SlowMovieData:
                     frame = self.currentFrame
 
                 if favName in self.__movies.keys() and frame <= self.__movies[favName]['totalFrames']:
-                    return self._addFavorite(favName, frame, favorite['id'])
+                    return self.__addFavorite(favName, frame, favorite['id'])
 
         except ValueError as e:
-            logging.error("Could not parse favorite: {}".format(e))
+            logging.error("Could not parse favorite >>> {}".format(e))
         
         return False
 
-    def _addFavorite(self, name, frame, id):
+    def __addFavorite(self, name, frame, id):
         logging.info("Set as favorite {} {}".format(name, frame))
 
         if not 'favorites' in self.__movies[name]:
             self.__movies[name]['favorites'] = {}
         
-        #TODO check for errors
+        # frame name
+
+        img = name.split('.')[0] + "_" + str(frame) + ".jpg"
         self.__movies[name]['favorites'][id] = {
             'frame': frame,
-            'time': self.__getTimeHuman(frame)
+            'time': self.__getTimeHuman(frame),
+            'img': img
         }
+
+        # generate fav frame
+        try:
+            generate_frame(viddir + name, self.frameDir + img, self.__getTimeMs(frame))
+        except Exception as ex:
+            logging.error("Could not process frame {} for {} >>> {}".format(frame, name, ex))
 
         self.__save()
         return True
@@ -424,7 +451,7 @@ class SlowMovieData:
                     ))
 
                 except ffmpeg.Error as e:
-                    logging.error("Could not read movie '{}': {}".format(file, e))
+                    logging.error("Could not read movie '{}' >>> {}".format(file, e))
         
         if not movieList:
             self.__movies = {}
@@ -445,7 +472,7 @@ class SlowMovieData:
                 self.__movie = selectedMovie
                 logging.info("Updated current movie '{}'".format(self.__movie))
             except IndexError as e:
-                logging.error("Cannot choose from empty movie list {}".format(e))
+                logging.error("Cannot choose from empty movie list >>> {}".format(e))
 
         self.__save()
         return True
