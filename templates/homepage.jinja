@@ -30,6 +30,9 @@
         padding-bottom: 0;
         margin-bottom: 0.2rem;
     }
+    .sm-lastUpdate {
+        display: block;
+    }
     .sm-random.input-field label {
         left:45%;
     }
@@ -144,7 +147,8 @@
                         <span>Number of frames skipped between screen updates</span>
                     </div>
                     <div class="sm-delay col s4 offset-m1 m4 offset-l2 l3">
-                        <span>Delay between screen updates. Updated <span id='lastUpdate'></span> secs. ago</span>
+                        <span>Delay between screen updates
+                        <span class='sm-lastUpdate'>Updated <span id='lastUpdate'></span> secs. ago</span>
                     </div>
                 </div>
             </div>
