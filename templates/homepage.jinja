@@ -1,3 +1,7 @@
+{% macro cleanMovieName(name) -%}
+{{name | replace("_", " ") | replace(".mp4", "") }}
+{%- endmacro -%}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,114 +17,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-    .sm-movie-header {
-        margin-bottom: 0.5em;
-    }
-    .sm-general-settings {
-        padding-bottom: 3ex;
-    }
-    .sm-general-settings .row {
-        margin-bottom: 5px;
-    }
-    .sm-general-settings-inputs .input-field {
-        padding-bottom: 0;
-        margin-bottom: 0;
-    }
-    .sm-general-settings-inputs .input-field input {
-        padding-bottom: 0;
-        margin-bottom: 0.2rem;
-    }
-    .sm-lastUpdate {
-        display: block;
-    }
-    .sm-random.input-field label {
-        left:45%;
-    }
-    .input-field input {
-        text-align: center;
-    } 
-    .sm-general-settings-labels {
-        color:#607d8b /* blue-grey */
-    }
-    .sm-general-settings-labels div {
-        text-align: center;
-    }
-    .sm-movie {
-        padding: 1em 1em 0em 1em;
-        margin-bottom: 0;
-    }
-    .sm-movie:first-of-type {
-        border-radius: 4px 4px 0 0;
-    }
-    .sm-movie:last-of-type {
-        margin-bottom: 2em;
-        border-radius: 0 0 4px 4px;
-    }
-    .sm-movie.odd {
-        background-color: #eceff1;  /* blue-grey lighten-5 */
-    }
-    .sm-movie.even {
-        background-color: #cfd8dc;  /* blue-grey lighten-4 */
-    }
-    .sm-movie-title {
-        text-align: right;
-        margin-bottom: 1ex;
-    }
-    .sm-movie-title>label>span {
-        font-size:2rem !important;
-        color: #004d40; /* teal darken-4 */
-    }
-    /* Radios of the right */
-    .sm-movie-title [type="radio"]+span:before, 
-    .sm-movie-title [type="radio"]+span:after {
-        right:0;
-        left: auto;
-    }
-    .sm-movie-title [type="radio"]:not(:checked)+span, 
-    .sm-movie-title [type="radio"]:checked+span {
-        padding-right: 1em;
-        padding-left: 0;
-    }
-    .sm-fav-button  {
-        text-align: right;
-        padding-right: 0em;
-        margin-bottom: 1ex;
-    }
-    .sm-movie-current-time input[type=text]:not(.browser-default){
-        height:2rem;
-        width: 7em;
-        color:#37474f; /* blue-grey darken-3 */
-    }
-    .sm-movie-current-time label {
-        color:#546e7a; /* blue-grey darken-1 */
-    }
-    .sm-movie-total-time {
-        color:#90a4ae; /* blue-grey lighten-2 */
-        display: block;
-        font-size: 80%; 
-    }
-    .sm-frame {
-        padding: 0 !important;
-        margin: 0;
-    }
-    .sm-frame img {
-        max-width: 100%;
-        max-height: 100%;
-        border-radius: 4px;
-    }
+        .sm-movies h3 {
+            padding-top: 0.5ex;
+            padding-bottom: 0.5ex;
+        }
+        .sm-submit {
+            margin-top: 2ex;
+        }
+        .sm-general-settings {
+            padding-bottom: 3ex;
+        }
+        .sm-general-settings .row {
+            margin-bottom: 5px;
+        }
+        .sm-general-settings-inputs .input-field {
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .sm-general-settings-inputs .input-field input {
+            padding-bottom: 0;
+            margin-bottom: 0.2em;
+        }
+        .sm-random.input-field label {
+            left:45%;
+        }
+        .input-field input {
+            text-align: center;
+        } 
+        .sm-general-settings-labels {
+            color:#607d8b /* blue-grey */
+        }
+        .sm-general-settings-labels div {
+            text-align: center;
+        }
+        .sm-current-frame .card-title {
+            font-weight: 500;
+            font-size: 300%;
+            padding-bottom: 4px;
+        }
+        .sm-current-frame-time {
+        }
+        .sm-lastUpdate {
+            padding-left: 2em;
+        }
+        .sm-current-frame-fav, .modal-close-btn {
+            float: right;
+            margin-top: -4px;
+        }
+        .sm-movie {
+            padding: 1em 1em 0em 1em;
+            margin-bottom: 0;
+        }
+        .sm-movie:first-of-type {
+            border-radius: 4px 4px 0 0;
+        }
+        .sm-movie:last-of-type {
+            margin-bottom: 2em;
+            border-radius: 0 0 4px 4px;
+        }
+        .sm-movie.odd {
+            background-color: #eceff1;  /* blue-grey lighten-5 */
+        }
+        .sm-movie.even {
+            background-color: #cfd8dc;  /* blue-grey lighten-4 */
+        }
+        .sm-movie-title {
+            text-align: right;
+            margin-bottom: 1ex;
+        }
+        .sm-movie-title>label>span {
+            font-size:2rem !important;
+            color: #004d40; /* teal darken-4 */
+        }
+        /* Radios of the right */
+        .sm-movie-title [type="radio"]+span:before, 
+        .sm-movie-title [type="radio"]+span:after {
+            right:0;
+            left: auto;
+        }
+        .sm-movie-title [type="radio"]:not(:checked)+span, 
+        .sm-movie-title [type="radio"]:checked+span {
+            padding-right: 1em;
+            padding-left: 0;
+        }
+        /*.sm-fav-button  {
+            text-align: right;
+            padding-right: 0em;
+            margin-bottom: 1ex;
+        }*/
+        .sm-movie-current-time input[type=text]:not(.browser-default){
+            height:2rem;
+            width: 7em;
+            color:#37474f; /* blue-grey darken-3 */
+        }
+        .sm-movie-current-time label {
+            color:#546e7a; /* blue-grey darken-1 */
+        }
+        .sm-movie-total-time {
+            color:#90a4ae; /* blue-grey lighten-2 */
+            display: block;
+            font-size: 80%; 
+        }
+        .sm-frame {
+            padding: 0 !important;
+            margin: 0;
+        }
+        .sm-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+        }
+
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(55, 71, 79); /* Fallback color #37474f blue-grey darken-3 */
+            background-color: rgba(55, 71, 79,0.8); /* Black w/ opacity */
+            max-height: 100%;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .modal-close-btn {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .modal-close-btn:hover,
+        .modal-close-btn:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 
-<body onload=display_lastUpdate();>
-    <form action="/form" class="col s12" method="post" enctype="application/x-www-form-urlencoded">
-        <div class="container">
-            <div class="row">
-                <div class="col s12">
-                    <h2 class="left-align">Very Slow Movie Player</h2>
-                </div>
+<body onload="display_lastUpdate();activate_modal();"">
+    <div class="container">
+        <div class="row sm-title">
+            <div class="col s12">
+                <h2 class="center-align">Very Slow Movie Player</h2>
             </div>
+        </div>
 
-            <div class="row sm-general-settings">
+        <div class="row sm-general-settings z-depth-2">
+            <form action="/form" class="col s12" method="post" enctype="application/x-www-form-urlencoded">
                 <div class="row sm-general-settings-inputs">
                     <div class="sm-random input-field col s4 m2">
                         <label>
@@ -147,64 +206,75 @@
                         <span>Number of frames skipped between screen updates</span>
                     </div>
                     <div class="sm-delay col s4 offset-m1 m4 offset-l2 l3">
-                        <span>Delay between screen updates
-                        <span class='sm-lastUpdate'>Updated <span id='lastUpdate'></span> secs. ago</span>
+                        <span>Delay between screen updates</span>
                     </div>
                 </div>
-            </div>
+                <div class="row center-align">
+                    <button class="sm-submit btn waves-effect waves-light" type="submit" name="action">
+                        Update General Settings<i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <div class="row sm-movie-header">
-                <h3 class="left-align">Movies</h3>
-            </div>
-
-            {% for key, value in smData.movies.items() %}
-            <div class="row sm-movie {{ loop.cycle('odd', 'even') }}">
-                {% if key == smData.movie %}
-
-                <div class="sm-frame col s2 m3 l4">
-                    <a href="frame/current.jpg">
-                        {# generate a random id so the current image is not cached #}
-                        <img src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
+        <div class="row sm-current-frame">
+            <div class="card">
+                <div class="card-image">
+                    {# generate a random id so the current image is not cached #}
+                    <img class="responsive-img sm-current-img "
+                        src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
+                    <span class="card-title">{{cleanMovieName(smPlayer.movie)}}</span>
+                </div>
+                <div class="card-action">
+                    <span class='sm-current-frame-time'>
+                        Running time: {{smPlayer.time}}
+                    </span>
+                    <span class='sm-lastUpdate'>
+                        Updated <span id='lastUpdate'></span> secs. ago
+                    </span>
+                    <a class="sm-current-frame-fav btn-floating btn-small waves-effect waves-light red"
+                        id="modal-fav-btn">
+                        <i class="material-icons">favorite</i>
                     </a>
                 </div>
-
-                <div class=" col s5 m5 l6">
-                {% else %}
-                <div class=" col s7 m8 l10">
-                {% endif %} 
-                    <div class="row sm-movie-title">
-                        <label>
-                            <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
-                                {% if key == smData.movie %}
-                                    checked="checked" 
-                                {% endif %} 
-                            />
-                            <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
-                        </label>
-                    </div>
-
-                    {% if key == smData.movie %}
-                    <div class="row sm-fav-button">
-                        <a class="btn-floating btn-small waves-effect waves-light red">
-                            <i class="material-icons">favorite</i>
-                        </a>
-                    </div>
-                    {% endif %} 
-                </div>
-
-                <div class="sm-movie-current-time input-field col s5 m4 l2">
-                    <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
-                    <label for="current_{{key}}">Displayed frame</label>
-                    <span class="sm-movie-total-time">Running time {{value.totalTime[0:8]}}</span>
-                </div>
             </div>
-            {% endfor %}
-            <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-                <i class="material-icons right">send</i>
-            </button>
         </div>
-    </form>
-    <br/>
+
+        <div class="row sm-movies z-depth-2">
+            <h3 class="center-align">Movies</h3>
+            <form action="/form" class="col s12" method="post" enctype="application/x-www-form-urlencoded">
+                {% for key, value in smData.movies.items() %}
+                    <div class="row sm-movie {{ loop.cycle('odd', 'even') }}
+                        {% if key == smData.movie %}z-depth-5{% endif %}">
+                        <div class=" col s7 m8 l10">
+                            <div class="row sm-movie-title">
+                                <label>
+                                    <input type="radio" id="{{key}}" name="movie" value="{{key}}" 
+                                        {% if key == smData.movie %}
+                                            checked="checked" 
+                                        {% endif %} 
+                                    />
+                                    <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="sm-movie-current-time input-field col s5 m4 l2">
+                            <input placeholder="hh:mm:ss.SSS" type="text" class="validate" id="current_{{key}}" name="current_{{key}}" value="{{value.currentTime}}">
+                            <label for="current_{{key}}">Displayed frame</label>
+                            <span class="sm-movie-total-time">Total running time {{value.totalTime[0:8]}}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="row center-align">
+                    <button class="sm-submit btn waves-effect waves-light" type="submit" name="action">
+                        Update Movies Settings<i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="page-footer">
         <div class="footer-copyright">
             <div class="container">
@@ -219,21 +289,79 @@
             </div>
     </footer>
 
-<!-- Compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<script type="text/javascript"> 
-    function display_l(){
-        var refresh=1000; // Refresh rate in milli seconds
-        mytime=setTimeout('display_lastUpdate()',refresh)
-    }
+    <!-- The Modal -->
+    <div id="modal-fav" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
 
-    function display_lastUpdate() {
-        var displayed = new Date("{{ lastUpdate | replace(" ", "T")}}").getTime();
-        var now = new Date().getTime();
-        var secs = Math.round((now - displayed) / 1000);
-        document.getElementById('lastUpdate').innerHTML = secs;
-        display_l();
-    }
-</script>
+
+        <div class="row sm-current-frame">
+            <div class="card">
+                <div class="card-image">
+                    {# generate a random id so the current image is not cached #}
+                    <img class="responsive-img sm-current-img "
+                        src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
+                    <span class="card-title">{{cleanMovieName(smPlayer.movie)}}</span>
+                </div>
+                <div class="card-action">
+                    <span class='sm-current-frame-time'>
+                        Running time: {{smPlayer.time}}
+                    </span>
+                    <a class="modal-close-btn btn-floating btn-small waves-effect waves-light blue-grey">
+                        <i class="material-icons">close</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+
+        </div>
+    </div>
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript"> 
+        function display_l(){
+            var refresh=1000; // Refresh rate in milli seconds
+            mytime=setTimeout('display_lastUpdate()',refresh)
+        }
+
+        function display_lastUpdate() {
+            var displayed = new Date("{{ smPlayer.when | replace(" ", "T")}}").getTime();
+            var now = new Date().getTime();
+            var secs = Math.round((now - displayed) / 1000);
+            document.getElementById('lastUpdate').innerHTML = secs;
+            display_l();
+        }
+
+        function activate_modal() {
+            // Get the modal
+            var modal = document.getElementById("modal-fav");
+
+            // Get the button that opens the modal
+            var btn = document.getElementById("modal-fav-btn");
+
+            // Get the element that closes the modal
+            var close = document.getElementsByClassName("modal-close-btn")[0];
+
+            // When the user clicks the button, open the modal 
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+
+            // When the user clicks on (x), close the modal
+            close.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+    </script>
 </body>
 </html>

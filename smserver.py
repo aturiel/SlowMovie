@@ -152,7 +152,7 @@ class S(BaseHTTPRequestHandler):
         templateLoader = jinja2.FileSystemLoader(searchpath="./")
         templateEnv = jinja2.Environment(loader=templateLoader)
         template = templateEnv.get_template("./templates/homepage.jinja")
-        outputText = template.render({'smData':smData.configToDict(), 'lastUpdate':smPlayer.lastUpdate})  # this is where to put args to the template renderer
+        outputText = template.render({'smData':smData.configToDict(), 'smPlayer':smPlayer.currentFrameData})  # this is where to put args to the template renderer
         return outputText
 
 class SlowMovieServer:

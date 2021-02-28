@@ -29,7 +29,7 @@ if not DEBUG_MODE:
 class SlowMoviePlayer:
     def __init__(self, data):
         self.smdata = data
-        self.__lastUpdate = datetime.now()
+        self.__currentFrameData = None
 
         if not DEBUG_MODE:
             # Ensure this is the correct driver for your particular screen 
@@ -39,8 +39,8 @@ class SlowMoviePlayer:
             #epd.Clear()
 
     @property
-    def lastUpdate(self):
-        return self.__lastUpdate
+    def currentFrameData(self):
+        return self.__currentFrameData
 
     def play(self):
         while True: 
@@ -49,7 +49,6 @@ class SlowMoviePlayer:
                 try:
                     # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
                     generate_frame(self.smdata.movieFile, self.smdata.currentFrameImage, self.smdata.currentTimeMs)
-                    self.__lastUpdate = datetime.now()
                     ellapsed_generate = time.time() - start_time
                     start_time = time.time()
 
@@ -61,6 +60,12 @@ class SlowMoviePlayer:
                         # display the image 
                         self.epd.display(self.epd.getbuffer(pil_im))
 
+                    self.__currentFrameData = {
+                        'when': datetime.now(),
+                        'movie': self.smdata.movie,
+                        'time': self.smdata.currentTimeHuman,
+                        'frame': self.smdata.currentFrame,
+                    } 
                 except ffmpeg.Error as e:
                     logging.error("Could not read movie '{}' >>> {}".format(self.smdata.movieFile, e))
                 except Exception as ex:
@@ -76,7 +81,7 @@ class SlowMoviePlayer:
                     self.smdata.movieFrames, 
                     ellapsed_generate, 
                     ellapsed,
-                    self.__lastUpdate.strftime("%H:%M:%S")
+                    self.__currentFrameData['when'].strftime("%H:%M:%S")
                 ))
 
             time.sleep(self.smdata.delay)
