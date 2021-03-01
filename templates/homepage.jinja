@@ -55,8 +55,9 @@
             font-size: 300%;
             padding-bottom: 4px;
         }
-        .sm-lastUpdate {
+        .sm-current-frame .card-action label span {
             padding-left: 2em;
+            font-size: 0.8rem;
         }
         .sm-current-frame-fav {
             float: right;
@@ -170,7 +171,7 @@
     </style>
 </head>
 
-<body onload="display_lastUpdate();activate_modal();"">
+<body onload="init();"">
     <div class="container">
         <div class="row sm-title">
             <div class="col s12">
@@ -227,10 +228,17 @@
                 </div>
                 <div class="card-action">
                     <label>
-                        <b>Running time</b> {{smPlayer.time}}
+                        <input type="checkbox" class="auto-refresh" id="auto-refresh" 
+                            {% if smData.random == true %}
+                                checked="checked" 
+                            {% endif %} />
+                        <span><b>Auto refresh</b></span>
                     </label>
-                    <label class='sm-lastUpdate'>
-                        <b>Updated</b> <span id='lastUpdate'></span> secs. ago
+                    <label>
+                        <span><b>Running time</b> {{smPlayer.time}}</span>
+                    </label>
+                    <label>
+                        <span><b>Updated</b> <span id='lastUpdate'></span> secs. ago</span>
                     </label>
                     <a class="sm-current-frame-fav btn-floating btn-small waves-effect waves-light red"
                         id="modal-current-frame-fav-btn-open">
@@ -340,6 +348,31 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script type="text/javascript"> 
+        function init() {
+            // restore "auto refresh" value from local storasge
+            var autoRefresh = document.getElementById("auto-refresh");
+
+            if(localStorage.getItem("auto-refresh")) {
+                autoRefresh.checked = true;
+            }
+
+            //sync local storage and check value
+            autoRefresh.onclick = function () {
+                console.info("auto-refresh " + autoRefresh.checked); 
+                if (autoRefresh.checked) {
+                    localStorage.setItem("auto-refresh", true);
+                } else {
+                    localStorage.removeItem("auto-refresh");
+                }
+            };
+
+            // update "frame secs. ago" and "auto refresh""
+            display_lastUpdate();
+
+            // modal fav-frame
+            activate_modal();
+        }
+
         function display_l(){
             var refresh=1000; // Refresh rate in milli seconds
             mytime=setTimeout('display_lastUpdate()',refresh)
@@ -351,6 +384,10 @@
             var secs = Math.round((now - displayed) / 1000);
             document.getElementById('lastUpdate').innerHTML = secs;
             display_l();
+
+            if(localStorage.getItem("auto-refresh") && secs > {{smData.delay}})  {
+                location.reload();
+            }
         }
 
         function activate_modal() {
