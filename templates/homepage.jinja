@@ -55,12 +55,10 @@
             font-size: 300%;
             padding-bottom: 4px;
         }
-        .sm-current-frame-time {
-        }
         .sm-lastUpdate {
             padding-left: 2em;
         }
-        .sm-current-frame-fav, .modal-close-btn {
+        .sm-current-frame-fav {
             float: right;
             margin-top: -4px;
         }
@@ -128,6 +126,12 @@
             border-radius: 4px;
         }
 
+        .sm-current-frame, 
+        .sm-current-frame .card,
+        .sm-current-frame .card-action > .row {
+            margin-bottom: 0;
+        }
+
         /* The Modal (background) */
         .modal {
             display: none; /* Hidden by default */
@@ -154,19 +158,15 @@
         }
 
         /* The Close Button */
-        .modal-close-btn {
-            color: #aaaaaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .row.sm-current-frame {
+            position: relative;
         }
-
-        .modal-close-btn:hover,
-        .modal-close-btn:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
+        .modal-btn-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
         }
+    
     </style>
 </head>
 
@@ -226,14 +226,14 @@
                     <span class="card-title">{{cleanMovieName(smPlayer.movie)}}</span>
                 </div>
                 <div class="card-action">
-                    <span class='sm-current-frame-time'>
-                        Running time: {{smPlayer.time}}
-                    </span>
-                    <span class='sm-lastUpdate'>
-                        Updated <span id='lastUpdate'></span> secs. ago
-                    </span>
+                    <label>
+                        <b>Running time</b> {{smPlayer.time}}
+                    </label>
+                    <label class='sm-lastUpdate'>
+                        <b>Updated</b> <span id='lastUpdate'></span> secs. ago
+                    </label>
                     <a class="sm-current-frame-fav btn-floating btn-small waves-effect waves-light red"
-                        id="modal-fav-btn">
+                        id="modal-current-frame-fav-btn-open">
                         <i class="material-icons">favorite</i>
                     </a>
                 </div>
@@ -290,32 +290,50 @@
     </footer>
 
     <!-- The Modal -->
-    <div id="modal-fav" class="modal">
+    <div id="modal-current-frame-fav" class="modal">
         <!-- Modal content -->
         <div class="modal-content">
-
-
-        <div class="row sm-current-frame">
-            <div class="card">
-                <div class="card-image">
-                    {# generate a random id so the current image is not cached #}
-                    <img class="responsive-img sm-current-img "
-                        src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
-                    <span class="card-title">{{cleanMovieName(smPlayer.movie)}}</span>
-                </div>
-                <div class="card-action">
-                    <span class='sm-current-frame-time'>
-                        Running time: {{smPlayer.time}}
-                    </span>
-                    <a class="modal-close-btn btn-floating btn-small waves-effect waves-light blue-grey">
-                        <i class="material-icons">close</i>
-                    </a>
+            <div class="row sm-current-frame">
+                <a id ="modal-current-frame-fav-btn-close" class="modal-btn-close btn-floating btn-small waves-effect waves-light blue-grey">
+                    <i class="material-icons">close</i>
+                </a>
+                <div class="card">
+                    <div class="card-image">
+                        {# generate a random id so the current image is not cached #}
+                        <img class="responsive-img sm-current-img "
+                            src="frame/current.jpg?dummy={{ range(1,999) | random }}" alt="current displayed frame"> 
+                        <span class="card-title">{{cleanMovieName(smPlayer.movie)}}</span>
+                    </div>
+                    <div class="card-action">
+                        <div class="row valign-wrapper">
+                            <div class="col s3 center-align">
+                                <span class='sm-current-frame-time'>
+                                    <label><b>Running time</b><br/>{{smPlayer.time}}</label>
+                                </span>
+                            </div>
+                            <div class="col s2 center-align">
+                                <span class='sm-current-frame-time'>
+                                    <label><b>Frame</b><br/>{{smPlayer.frame}}</label>
+                                </span>
+                            </div>
+                            <div class="col s5">
+                                <input placeholder="type name.." type="text" class="validate" id="fav_frame_id" name="fav_frame_id">
+                                <label for="fav_frame_id">Favorite name</label>
+                            </div>
+                            <div class="col ofsset-s1 s1">
+                                <div class="row right-align valign-wrapper">
+                                    <a id= "modal-current-frame-fav-btn-add" class="btn-floating btn-small waves-effect waves-light green">
+                                        <i class="material-icons">add</i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fav-error" class="row">
+                            <span class="new badge red" data-badge-caption="Can't save favorite frame"/>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-
-
         </div>
     </div>
 
@@ -336,23 +354,74 @@
         }
 
         function activate_modal() {
+            var modalTimeout = null;
+
             // Get the modal
-            var modal = document.getElementById("modal-fav");
+            var modal = document.getElementById("modal-current-frame-fav");
 
             // Get the button that opens the modal
-            var btn = document.getElementById("modal-fav-btn");
+            var open = document.getElementById("modal-current-frame-fav-btn-open");
 
             // Get the element that closes the modal
-            var close = document.getElementsByClassName("modal-close-btn")[0];
+            var close = document.getElementById("modal-current-frame-fav-btn-close");
+
+            // Get the element that add favorite
+            var add = document.getElementById("modal-current-frame-fav-btn-add");
+            add.style.visibility = 'hidden';
+
+            // Get the element that print the error
+            var errorElement = document.getElementById("fav-error");
+            errorElement.style.visibility = 'hidden';
+
+            // Get the element that contains frame ID
+            var frameId = document.getElementById("fav_frame_id");
 
             // When the user clicks the button, open the modal 
-            btn.onclick = function() {
+            open.onclick = function() {
                 modal.style.display = "block";
+                modalTimeout = setInterval(function(){ 
+                    add.style.visibility = frameId.value ? 'visible' : 'hidden';
+                }, 100);
             }
 
             // When the user clicks on (x), close the modal
             close.onclick = function() {
+                clearTimeout(modalTimeout);
                 modal.style.display = "none";
+            }
+
+            // ...
+            add.onclick = function() {
+                var favData = { 
+                    name: '{{smPlayer.movie}}',
+                    frame: {{smPlayer.frame}},
+                    id: frameId.value
+                };
+
+                var raw = JSON.stringify(favData);
+                //console.log("Add fav >>> " + raw);
+
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "text/plain");
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+
+                fetch("/favorite", requestOptions)
+                .then(response => response.text())
+                .then(result => {
+                        add.style.visibility = 'hidden'
+                        errorElement.style.visibility = 'hidden';
+                    }
+                )
+                .catch(error => {
+                        console.log('error', error);
+                        errorElement.style.visibility = 'visible';
+                    }
+                );
             }
 
             // When the user clicks anywhere outside of the modal, close it

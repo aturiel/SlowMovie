@@ -343,7 +343,7 @@ class SlowMovieData:
             favorite = json.loads(json_str)
 
 
-            if 'id' in favorite:
+            if 'id' in favorite and favorite['id']:
                 # if we have human time and not frame
                 if 'time' in favorite and not 'frame' in favorite:
                     frame = self.__getFrameFromTime(favorite['time'])
