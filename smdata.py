@@ -240,7 +240,7 @@ class SlowMovieData:
             logging.error("Could not parse json settings >>> {}".format(e))
             return False
 
-    def setFormData(self, vars):
+    def setFormGeneral(self, vars):
         """update from internal web form"""
         retValue = False
         try:
@@ -261,7 +261,23 @@ class SlowMovieData:
                     self.__random = True
                     retValue = True
 
-                elif key == 'movie':
+                #else:
+                    #logging.info("Could not parse post variable: {}:{}".format(key, vars[key]))
+
+        except ValueError as e:
+            logging.error("Could not parse form data >>> {}".format(vars))
+
+        if retValue:
+            self.__save()
+
+        return retValue
+
+    def setFormMovies(self, vars):
+        """update from internal web form"""
+        retValue = False
+        try:
+            for key in vars:
+                if key == 'movie':
                     if vars[key][0] in self.__movies:
                         self.__movie = vars[key][0]
                         self.__skipNextIncrement = True
@@ -275,8 +291,8 @@ class SlowMovieData:
                     self.__setCurrentFrame(name, frame)
                     retValue = True
 
-                else:
-                    logging.info("Could not parse post variable: {}:{}".format(key, vars[key]))
+                #else:
+                    #logging.info("Could not parse post variable: {}:{}".format(key, vars[key]))
 
         except ValueError as e:
             logging.error("Could not parse form data >>> {}".format(vars))

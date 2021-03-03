@@ -63,7 +63,7 @@ class S(BaseHTTPRequestHandler):
                 self.wfile.write("File not found")
                 return
             else:
-                logging.info("GET [{}] >>> image of {} bytes".format(self.path, file_data_len))
+                #logging.info("GET [{}] >>> image of {} bytes".format(self.path, file_data_len))
                 self.send_response(200)
                 self.send_header("Accept-Ranges","bytes")
                 self.send_header("Content-Disposition","attachment")
@@ -73,9 +73,17 @@ class S(BaseHTTPRequestHandler):
                 self.wfile.write(file_data)
 
         elif self.path == '/':
-            logging.info("homepage")
-            self.__set_response()
-            self.wfile.write(self._getHomePage().encode("utf-8"))
+            try:
+                #logging.info("homepage")
+                self.__set_response()
+                rawBytes = self._getHomePage().encode("utf-8")
+                self.wfile.write(rawBytes)
+            except Exception as ex:
+                logging.error("GET homepage [{}] >>> {}".format(name, ex))
+                self.send_error(404)
+                self.end_headers()
+                self.wfile.write("File not found")
+                return
 
         else:
             logging.error(self.__remove_empty_lines(
@@ -111,15 +119,19 @@ class S(BaseHTTPRequestHandler):
         #    if smData.__setJson(post_data):
         #        response = 200
         
-        elif self.path.startswith('/form'):
-            logging.info("test")
+        elif self.path.startswith('/form/'):
+            logging.info(self.path)
             postvars = parse_qs(post_data,keep_blank_values=1)
-            smData.setFormData(postvars);
+            if self.path == '/form/general':
+                smData.setFormGeneral(postvars)
+            else: # '/form/movies'
+                smData.setFormMovies(postvars)
             self.send_response(301)
             self.send_header('Location','/')
             self.end_headers()
             self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
             return
+
 
         if response == 200:
             logging.info("POST OK [{}]".format(post_data))
@@ -167,7 +179,7 @@ class SlowMovieServer:
 
         sys.exit(0)
 
-    def _start_server(self, port=9998):
+    def __start_server(self, port=9998):
         server_address = ('', port)
         self.httpd = HTTPServer(server_address, S)
 
@@ -176,6 +188,9 @@ class SlowMovieServer:
         logging.info('Server starting at http://%s:%d...'%(local_ip,port))
 
         self.httpd.serve_forever()
+
+    def __start_player(self):
+        smPlayer.play()
 
     def __init__(self):
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -188,16 +203,22 @@ class SlowMovieServer:
 
         global smData, smPlayer
         smData = SlowMovieData()
+        smPlayer = SlowMoviePlayer(smData)
 
         daemon = threading.Thread(
             name='daemon_server',
-            target=self._start_server,
+            target=self.__start_server,
             args=())
         daemon.setDaemon(True) # Set as a daemon so it will be killed once the main thread is dead.
         daemon.start()
 
-        smPlayer = SlowMoviePlayer(smData)
-        smPlayer.play()
+        thread = threading.Thread(
+            name='thread_player',
+            target=self.__start_player,
+            args=())
+        thread.start()
+        #smPlayer = SlowMoviePlayer(smData)
+        #smPlayer.play()
 
 if __name__ == '__main__':
     SlowMovieServer();

@@ -29,7 +29,7 @@ if not DEBUG_MODE:
 class SlowMoviePlayer:
     def __init__(self, data):
         self.smdata = data
-        self.__currentFrameData = None
+        self.__currentFrameData = {}
 
         if not DEBUG_MODE:
             # Ensure this is the correct driver for your particular screen 
@@ -84,7 +84,11 @@ class SlowMoviePlayer:
                     self.__currentFrameData['when'].strftime("%H:%M:%S")
                 ))
 
-            time.sleep(self.smdata.delay)
+            # better reaction to delay updates
+            startSleep = time.time() 
+            while time.time() < startSleep + self.smdata.delay:
+                time.sleep(1)
+            #time.sleep(self.smdata.delay)
             #epd.init()
 
             self.smdata.incrementFrame()
