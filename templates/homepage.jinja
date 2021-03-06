@@ -22,7 +22,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
 {% macro frameImage(img, id) %}
 <div class="card-image">
     {# generate a random id so the current image is not cached #}
-    <img class="responsive-img"
+    <img class="responsive-img" loading="lazy"
         src="frame/{{img}}" alt="favorite frame image"> 
     <span class="card-title">{{id}}</span>
 </div>
@@ -372,7 +372,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                                 </div>
                             </div>
                         </div>
-                        <div id="sm-error-msg" class="row">
+                        <div id="sm-current-frame-error-msg" class="row">
                             <span class="new badge red" data-badge-caption="Can't save favorite frame"/>
                         </div>
                     </div>
@@ -396,16 +396,21 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                             <div class="card">
                                 {{ frameImage(fav.img, favName) }}
                                 <div class="card-action">
-                                    <label><b>Movie</b>: {{cleanMovieName(key)}}</label>
-                                    <label><b>Time</b>: {{fav.time}}</label>
-                                    <a class="sm-card-action btn-floating btn-small waves-effect waves-light blue"
-                                        id="modal:{{key}}:{{favName}}:btn-activate">
-                                        <i class="material-icons">visibility</i>
-                                    </a>
-                                    <a class="sm-card-action btn-floating btn-small waves-effect waves-light red"
-                                        id="modal:{{key}}:{{favName}}:btn-delete">
-                                        <i class="material-icons">delete</i>
-                                    </a>
+                                    <div class="row valign-wrapper">
+                                        <label><b>Movie</b>: {{cleanMovieName(key)}}</label>
+                                        <label><b>Time</b>: {{fav.time}}</label>
+                                        <a class="sm-card-action btn-floating btn-small waves-effect waves-light blue"
+                                            id="modal:{{key}}:{{favName}}:btn-activate">
+                                            <i class="material-icons">visibility</i>
+                                        </a>
+                                        <a class="sm-card-action btn-floating btn-small waves-effect waves-light red"
+                                            id="modal:{{key}}:{{favName}}:btn-delete">
+                                            <i class="material-icons">delete</i>
+                                        </a>
+                                </div>
+                                <div id="modal:{{key}}:{{favName}}:sm-error-msg" class="row">
+                                    <span class="new badge red" data-badge-caption="Error while executing"/>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -429,7 +434,6 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
 
             //sync local storage and check value
             autoRefresh.onclick = function () {
-                console.info("auto-refresh " + autoRefresh.checked); 
                 if (autoRefresh.checked) {
                     localStorage.setItem("auto-refresh", true);
                 } else {
@@ -478,6 +482,10 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                         var delete_{{count.value}} = document.getElementById("modal:{{key}}:{{favName}}:btn-delete");
                         var activate_{{count.value}} = document.getElementById("modal:{{key}}:{{favName}}:btn-activate");
 
+                        // Get the element that print the error
+                        var errorElement_{{count.value}} = document.getElementById("modal:{{key}}:{{favName}}:sm-error-msg");
+                        errorElement_{{count.value}}.style.visibility = 'hidden';
+
                         // When the user clicks the button, open the modal 
                         open_{{count.value}}.onclick = function() {
                             modal_{{count.value}}.style.display = "block";
@@ -487,6 +495,51 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                         close_{{count.value}}.onclick = function() {
                             modal_{{count.value}}.style.display = "none";
                         }
+
+                        // ...
+                        activate_{{count.value}}.onclick = function() {
+                            var data = { 
+                                name: '{{key}}',
+                                frame: {{fav.frame}}
+                            };
+
+                            fetch("/movie", createRequestOptions(data))
+                            .then(response => {
+                                if( response.status === 200)
+                                    return response.text()
+                                else
+                                    throw response.status
+                            })
+                            .then(result => { location.reload(); })
+                            .catch(error => {
+                                console.error("can't activate {{key}} {{favName}} >>> " + error);
+                                errorElement_{{count.value}}.style.visibility = 'visible';
+                            });
+                        } 
+
+                        // ...
+                        delete_{{count.value}}.onclick = function() {
+                            var data = { 
+                                name: '{{key}}',
+                                id: '{{favName}}'
+                            };
+
+                            var r_{{count.value}} = confirm("Do you want to delete favorite frame '{{favName}}' from '{{cleanMovieName(key)}}'?");
+                            if (r_{{count.value}} == true) {
+                                fetch("/favorite", createRequestOptions(data, "DELETE"))
+                                .then(response => {
+                                    if( response.status === 200)
+                                        return response.text()
+                                    else
+                                        throw response.status
+                                })
+                                .then(result => { location.reload(); })
+                                .catch(error => {
+                                    console.error("can't delete {{key}} {{favName}} >>> " + error);
+                                    errorElement_{{count.value}}.style.visibility = 'visible';
+                                });
+                            }
+                        } 
 
                         {% set count.value = count.value + 1 %}
                     {% endfor %}
@@ -511,7 +564,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
             add.style.visibility = 'hidden';
 
             // Get the element that print the error
-            var errorElement = document.getElementById("sm-error-msg");
+            var errorElement = document.getElementById("sm-current-frame-error-msg");
             errorElement.style.visibility = 'hidden';
 
             // Get the element that contains frame ID
@@ -540,16 +593,17 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                 };
 
                 fetch("/favorite", createRequestOptions(favData))
-                .then(response => response.text())
-                .then(result => {
-                        location.reload();
-                    }
-                )
+                .then(response => {
+                    if( response.status === 200)
+                        return response.text()
+                    else
+                        throw response.status
+                })
+                .then(result => { location.reload(); })
                 .catch(error => {
-                        console.log('error', error);
-                        errorElement.style.visibility = 'visible';
-                    }
-                );
+                    console.error("can't set favorite {{smPlayer.movie}}.{{smPlayer.frame}}.frameId.value {} >>> " + error);
+                    errorElement.style.visibility = 'visible';
+                });
             }
 
             // When the user clicks anywhere outside of the modal, close it
@@ -560,7 +614,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
             }
         }
 
-        function createRequestOptions(data) {
+        function createRequestOptions(data, _method='POST') {
             var raw = JSON.stringify(data);
             //console.log("Add fav >>> " + raw);
 
@@ -568,7 +622,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
             myHeaders.append("Content-Type", "text/plain");
 
             return requestOptions = {
-                method: 'POST',
+                method: _method,
                 headers: myHeaders,
                 body: raw,
                 redirect: 'follow'

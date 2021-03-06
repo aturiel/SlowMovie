@@ -146,6 +146,28 @@ class S(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
 
+    def do_DELETE(self):
+        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
+        post_data = self.rfile.read(content_length).decode('utf-8') # <--- Gets the data itself
+        response = 400
+
+        if self.path == '/favorite':
+            if smData.deleteFavorite(post_data):
+                response = 200
+
+        if response == 200:
+            logging.info("DELETE OK [{}]".format(post_data))
+        else:
+            logging.error(self.__remove_empty_lines(
+                "DELETE [{}] ERROR Headers >>>\n{}\nBody >>>\n{}"
+                .format(self.path, self.headers, post_data)
+            ))
+
+        self.send_response(response)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write("DELETE request for {}".format(self.path).encode('utf-8'))
+
     def __remove_empty_lines(self, text):
         return os.linesep.join([s for s in text.splitlines() if s])
 

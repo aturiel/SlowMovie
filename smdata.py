@@ -353,6 +353,27 @@ class SlowMovieData:
         
         return False
 
+    def deleteFavorite(self, json_str):
+        """set frame as favorite if only "id" currentFrame will be used"""
+        try:
+            favorite = json.loads(json_str)
+
+            if( 'id' in favorite and favorite['id'] and 
+                'name' in favorite and favorite['name'] and
+                self.__movies[favorite['name']]['favorites'][favorite['id']]):
+                logging.info("deleting {}.{}".format(favorite['name'], favorite['id']));
+                del self.__movies[favorite['name']]['favorites'][favorite['id']]
+                self.__save()
+                return True
+            else:
+                logging.info("can't delete {}.{}".format(favorite['name'], favorite['id']));
+
+        except ValueError as e:
+            logging.error("Could not parse favorite >>> {}".format(e))
+        
+        return False
+
+
     def setFavorite(self, json_str):
         """set frame as favorite if only "id" currentFrame will be used"""
         try:
