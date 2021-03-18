@@ -1,6 +1,7 @@
 # SlowMovie Server
 
-![](Extras/img.jpg)
+![](Extras/IMG_5770.jpg)
+![](Extras/IMG_5768.jpg)
 
 
 ## Based on  
@@ -9,6 +10,18 @@ https://medium.com/@tomwhitwell/how-to-build-a-very-slow-movie-player-in-2020-c5
 
 Bryan's original post here:  
 https://medium.com/s/story/very-slow-movie-player-499f76c48b62  
+
+## Homepage
+Integrated homepage will allow yo to change playyer settings
+ - randon frame
+ - frames skipped
+ - delay between frames
+ - current movie and frame
+ - manage favorite frames: to directly dispalye selected frames from your movies
+
+Build with [Materialize CSS](https://materializecss.com">)
+
+![](Extras/homepage.jpg)
 
 ## Run Slow Movie Server
 ```Shell
@@ -70,10 +83,20 @@ In general:
 ### Check service's log
 `sudo journalctl -f -u slowmovie.service`
 
+## 3D Printer parts
+[Raspberry Pi 3B+ case](https://www.thingiverse.com/thing:3361218) based on a desing from [mkellsy](https://www.thingiverse.com/mkellsy)
+
+- Frame adjustment - https://www.tinkercad.com/things/8cEJlHhdwC7
+- Frame back panel - https://www.tinkercad.com/things/24gwuQ8l2YA
+- PI back & frame support - https://www.tinkercad.com/things/72tjLu8RRyo
+
 ## REFERENCES
 - https://www.raspberrypi.org/documentation/linux/usage/systemd.md
 - https://gist.github.com/emxsys/a507f3cad928e66f6410e7ac28e2990f
 - https://wiki.archlinux.org/index.php/systemd
 - https://www.digitalocean.com/community/tutorials/understanding-systemd-units-and-unit-files
-- https://coreos.com/os/docs/latest/getting-started-with-systemd.html
+- https://www.tutorialdocs.com/article/getting-started-with-systemd-in-practice.html
 - https://materializecss.com
+
+
+
