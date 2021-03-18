@@ -13,11 +13,11 @@ https://medium.com/s/story/very-slow-movie-player-499f76c48b62
 
 ## Homepage
 Integrated homepage will allow yo to change playyer settings
- - randon frame
+ - random frame
  - frames skipped
  - delay between frames
  - current movie and frame
- - manage favorite frames: to directly dispalye selected frames from your movies
+ - manage favorite frames: to directly display selected frames from your movies
 
 Build with [Materialize CSS](https://materializecss.com">)
 
@@ -84,7 +84,7 @@ In general:
 `sudo journalctl -f -u slowmovie.service`
 
 ## 3D Printer parts
-[Raspberry Pi 3B+ case](https://www.thingiverse.com/thing:3361218) based on a desing from [mkellsy](https://www.thingiverse.com/mkellsy)
+[Raspberry Pi 3B+ case](https://www.thingiverse.com/thing:3361218) based on a design from [mkellsy](https://www.thingiverse.com/mkellsy)
 
 - Frame adjustment - https://www.tinkercad.com/things/8cEJlHhdwC7
 - Frame back panel - https://www.tinkercad.com/things/24gwuQ8l2YA
