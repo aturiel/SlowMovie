@@ -84,9 +84,7 @@ In general:
 `sudo journalctl -f -u slowmovie.service`
 
 ## 3D Printer parts
-[Raspberry Pi 3B+ case](https://www.thingiverse.com/thing:3361218) based on a design from [mkellsy](https://www.thingiverse.com/mkellsy)
-
-Frame is an [IKEA RIBBA](https://www.ikea.com/es/es/p/ribba-marco-negro-50378448/) 13x18cm
+[Raspberry Pi 3B+ case](https://www.thingiverse.com/thing:3361218) based on a design from [mkellsy](https://www.thingiverse.com/mkellsy). Frame is an [IKEA RIBBA](https://www.ikea.com/es/es/p/ribba-marco-negro-50378448/) 13x18cm.
 
 - Frame adjustment - https://www.tinkercad.com/things/8cEJlHhdwC7
 - Frame back panel - https://www.tinkercad.com/things/24gwuQ8l2YA
