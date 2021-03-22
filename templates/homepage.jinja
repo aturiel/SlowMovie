@@ -1,5 +1,6 @@
+{# movies name format is 'year-movie_name.mp4' #}
 {% macro cleanMovieName(name) -%}
-{{name | replace("_", " ") | replace(".mp4", "")}}
+{{name | replace("_", " ") | replace("-", " - ") | replace(".mp4", "")}}
 {%- endmacro -%}
 
 {% macro runningTime(time, style) -%}
@@ -214,7 +215,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
     <div class="container">
         <div class="row sm-title">
             <div class="col s12">
-                <h2 class="center-align">Very Slow Movie Player</h2>
+                <h3 class="center-align">Very Slow Movie Player</h3>
             </div>
         </div>
 
@@ -284,7 +285,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
         <div class="row sm-movies z-depth-2">
             <h3 class="center-align">Movies</h3>
             <form action="/form/movies" class="col s12" method="post" enctype="application/x-www-form-urlencoded">
-                {% for key, value in smData.movies.items() %}
+                {% for key, value in smData.movies.items()|sort %}
                     <div class="row sm-movie {{ loop.cycle('odd', 'even') }}
                         {% if key == smData.movie %}z-depth-5{% endif %}">
                         <div class=" col s7 m8 l10">
@@ -295,7 +296,7 @@ class="sm-total-running-time"><b>Running time</b> {{time}}</span>
                                             checked="checked" 
                                         {% endif %} 
                                     />
-                                    <span>{{key | replace("_", " ") | replace(".mp4", "") }}</span>
+                                    <span>{{cleanMovieName(key)}}</span>
                                 </label>
                             </div>
                             {% if value.favorites %}
