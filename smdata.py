@@ -86,6 +86,22 @@ class SlowMovieData:
     def currentTimeMs(self):
         return self.__getTimeMs(self.currentFrame)
 
+    @property 
+    def currentVideoWidth(self):
+        """get current movie video width"""
+        if self.__movie in self.__movies:
+            return self.__movies[self.__movie]['width']
+
+        return None
+
+    @property 
+    def currentVideoHeight(self):
+        """get current movie video height"""
+        if self.__movie in self.__movies:
+            return self.__movies[self.__movie]['height']
+
+        return None
+
     def __getTimeMs(self, frame):
         return "%dms"%(float(frame)*FRAME_CONSTANT)
 
@@ -422,7 +438,13 @@ class SlowMovieData:
 
         # generate fav frame
         try:
-            generate_frame(viddir + name, self.frameDir + img, self.__getTimeMs(frame))
+            generate_frame(
+                viddir + name, 
+                self.frameDir + img, 
+                self.__getTimeMs(frame), 
+                self.__movies[name]['width'],
+                self.__movies[name]['height']
+            )
         except Exception as ex:
             logging.error("Could not process frame {} for {} >>> {}".format(frame, name, ex))
 
@@ -466,15 +488,24 @@ class SlowMovieData:
                 try:
                     # Check how many frames are in the movie  and save for future use
                     start_time = time.time()
-                    frameCount = int(ffmpeg.probe(viddir + file)['streams'][0]['nb_frames'])
+                    movieInfo = ffmpeg.probe(viddir + file);
+                    #frameCount = int(ffmpeg.probe(viddir + file)['streams'][0]['nb_frames'])
+                    frameCount = int(movieInfo['streams'][0]['nb_frames'])
+                    width = int(movieInfo['streams'][0]['width'])
+                    height = int(movieInfo['streams'][0]['height'])
+
                     ellapsed = time.time() - start_time
 
                     if file in self.__movies:
+                        self.__movies[file]['width'] = width;
+                        self.__movies[file]['height'] = height;
                         self.__movies[file]['totalFrames'] = frameCount;
                         self.__movies[file]['totalTime'] = self.__getTimeHuman(frameCount)
 
                     else :
                         self.__movies[file] = {
+                            'width': width,
+                            'height': height,
                             'totalFrames': frameCount, 
                             'totalTime': self.__getTimeHuman(frameCount),
                         }

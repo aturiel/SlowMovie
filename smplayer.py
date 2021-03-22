@@ -48,7 +48,13 @@ class SlowMoviePlayer:
             if self.smdata.movieFile:
                 try:
                     # Use ffmpeg to extract a frame from the movie, crop it, letterbox it and save it 
-                    generate_frame(self.smdata.movieFile, self.smdata.currentFrameImage, self.smdata.currentTimeMs)
+                    generate_frame(
+                        self.smdata.movieFile, 
+                        self.smdata.currentFrameImage, 
+                        self.smdata.currentTimeMs,
+                        self.smdata.currentVideoWidth,
+                        self.smdata.currentVideoHeight
+                    )
                     ellapsed_generate = time.time() - start_time
                     start_time = time.time()
 
